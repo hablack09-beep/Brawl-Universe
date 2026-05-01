@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <title>Brawl Morph: Unified Edition</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Arial Black', sans-serif; cursor: crosshair; color: white; user-select: none; }
+        canvas { display: none; }
+        
+        /* ANIMACIONS */
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+
+        /* UI BUTTONS */
+        #back-to-world, #back-from-rewards, #back-from-levels, #back-from-profile {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(0, 0, 0, 0.7); color: white;
+            padding: 12px 24px; border-radius: 12px; border: 2px solid white;
+            z-index: 1100; cursor: pointer; display: none;
+        }
+
+        #reward-btn, #levels-btn {
+            position: absolute; top: 20px;
+            background: #ff00ff; color: white; padding: 12px 24px;
+            border-radius: 12px; border: 3px solid white; cursor: pointer; z-index: 1000;
+        }
+        #reward-btn { right: 280px; }
+        #levels-btn { right: 450px; background: #00bcff; }
+
+        #centes-display {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(0, 0, 0, 0.8); color: #00ffff;
+            padding: 15px 25px; border-radius: 15px; border: 3px solid #00ffff;
+            font-size: 20px; z-index: 1000; box-shadow: 0 0 15px rgba(0,255,255,0.5);
+        }
+
+        /* MENUS */
+        .menu { position: absolute; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; z-index: 100; justify-content: center; }
+        #menu-world { background: radial-gradient(circle, #220022 0%, #000 100%); }
+        #page-rewards, #page-levels { background: radial-gradient(circle, #330033 0%, #000 100%); display: none; }
+        #menu-profile { background: radial-gradient(circle, #202020 0%, #000 100%); display: none; }
+
+        .world-btn { padding: 30px 60px; font-size: 30px; margin: 20px; border-radius: 20px; cursor: pointer; border: 5px solid white; color: white; text-transform: uppercase; background: #ff4500; box-shadow: 0 0 20px orange; }
+        .world-btn:hover { transform: scale(1.05); }
+
+        /* LEVELS & REWARDS */
+        #page-levels { overflow-y: auto; padding-top: 100px; justify-content: flex-start !important; }
+        .alfombra { width: 80%; max-width: 600px; background: rgba(255, 255, 255, 0.05); border-radius: 50px; padding: 40px; display: flex; flex-direction: column; gap: 15px; border: 4px solid #333; margin-bottom: 50px; }
+        .level-card { background: #222; border-radius: 20px; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border: 2px solid #444; }
+        .level-card.unlocked { border-color: #00ff00; background: #1a2e1a; }
+        .claim-btn { background: #ffcc00; color: black; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .claim-btn:disabled { background: #555; cursor: not-allowed; }
+
+        /* GAME UI */
+        #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; }
+        .bar-container { position: absolute; width: 280px; height: 30px; background: rgba(0,0,0,0.5); border: 2px solid #fff; border-radius: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 100%; transition: width 0.3s; }
+        #player-ui { top: 60px; left: 20px; }
+        #boss-ui { top: 60px; right: 20px; }
+        .name-label { position: absolute; font-size: 18px; color: white; text-shadow: 2px 2px #000; font-weight: bold; }
+        
+        /* INVENTARI ARMES */
+        .inventory-panel { 
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
+            display: flex; gap: 8px; pointer-events: auto; 
+            background: rgba(0,0,0,0.6); padding: 10px; border-radius: 20px; border: 1px solid #444;
+        }
+        .slot { 
+            width: 50px; height: 50px; border: 2px solid #555; display: flex; align-items: center; justify-content: center; 
+            border-radius: 8px; background: rgba(0,0,0,0.7); font-size: 24px; opacity: 0.3; transition: 0.3s; position: relative;
+        }
+        .slot.unlocked { opacity: 1; border-color: #fff; cursor: pointer; }
+        .slot.active { border-color: #00ffff; box-shadow: 0 0 15px #00ffff; background: rgba(0,255,255,0.2); transform: scale(1.1); }
+        .cooldown-overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(255, 0, 0, 0.7); height: 0%; transition: height 0.1s;
+        }
+        .key-hint { position: absolute; top: -25px; color: #aaa; font-size: 12px; font-family: monospace; }
+
+        /* AVATAR SELECT UI AMB GRAELLA */
+        #avatar-grid-container {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; 
+            width: 100%; max-height: 65vh; overflow-y: auto; padding-right: 15px;
+        }
+        .avatar-card {
+            background: rgba(0,0,0,0.6); border: 3px solid #555; border-radius: 12px; cursor: pointer; 
+            padding: 15px 10px; text-align: center; transition: 0.2s;
+        }
+        .avatar-card:hover { transform: scale(1.05); border-color: #aaa; }
+        .avatar-card.selected { border-color: #00ffff; box-shadow: 0 0 15px #00ffff; }
+        .avatar-card img { width: 90px; height: 90px; object-fit: contain; }
+
+        .skin-row {
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; margin-bottom: 10px;
+        }
+        .skin-row img { width: 50px; height: 50px; object-fit: contain; }
+
+        /* BOSS ROULETTE */
+        #roulette-display { font-size:120px; border:10px solid gold; border-radius:50%; width:180px; height:180px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); }
+
+        /* MISSIONS */
+        #mission-tracker { position: absolute; bottom: 20px; left: 20px; background: rgba(0,0,0,0.9); border: 2px solid #ff00ff; padding: 15px; border-radius: 10px; display: none; z-index: 1000; }
+        
+        /* INFO ARMA */
+        #weapon-info { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); font-size: 14px; color: #aaa; text-shadow: 1px 1px black; }
+    </style>
+</head>
+<body>
+
+    <div id="back-to-world" onclick="goBackToWorld()">⬅️ ENRERE</div>
+    <div id="back-from-rewards" onclick="goHome()">⬅️ INDEX</div>
+    <div id="back-from-levels" onclick="goHome()">⬅️ INDEX</div>
+    
+    <div id="levels-btn" onclick="openLevels()">🏆 NIVELLS</div>
+    <div id="reward-btn" onclick="openRewards()">🎁 MISSIONS</div>
+    
+    <div id="centes-display">
+        🏆 Copes: <span id="centes-count">0</span><br>
+        ⭐ XP: <span id="xp-count" style="color:#ff00ff">0</span>
+    </div>
+
+    <div id="mission-tracker">
+        <div style="color:#ff00ff; font-size:14px; font-weight: bold;">REPTE ACTIU:</div>
+        <div id="track-time" style="font-family: monospace; font-size: 22px;">00:00</div>
+        <div id="track-progress" style="color: #00ffff;">Guanyat: 0 / 0 🏆</div>
+    </div>
+
+    <div id="page-levels" class="menu">
+        <h1 style="color:#00bcff; margin-bottom: 20px;">CAMÍ DE RECOMPENSES</h1>
+        <div class="alfombra" id="levels-container"></div>
+    </div>
+
+    <div id="menu-world" class="menu">
+        <div id="profile-btn-world" onclick="openProfile()" style="position:absolute; top:20px; left:20px; background:rgba(0,0,0,0.6); border:2px solid white; padding:10px; border-radius:10px; cursor:pointer; font-size:24px; z-index:200;">
+            👤 PERFIL
+        </div>
+
+        <h1 style="font-size:60px; margin-bottom: 20px; text-shadow: 0 0 20px #ff00ff;">BRAWL UNIVERSE</h1>
+        <div class="world-btn" onclick="openAvatarMenu()">⚔️ JUGAR</div>
+    </div>
+
+    <div id="menu-profile" class="menu">
+        <div id="back-from-profile" onclick="closeProfile()" style="display:block; background:red; position: absolute; top: 20px; left: 20px; padding: 10px; border-radius: 10px; cursor:pointer;">⬅️ SORTIR</div>
+        <h1 style="color: gold; margin-bottom: 30px;">GESTIÓ DE COMPTE</h1>
+
+        <div style="background:rgba(255,255,255,0.1); padding:30px; border-radius:20px; border:2px solid #00bcff; text-align:center; width: 500px; max-width:90%;">
+            <div style="margin-bottom: 20px;">
+                <div id="profile-icon" style="font-size: 80px; background:rgba(0,0,0,0.5); width:120px; height:120px; margin:0 auto; border-radius:50%; display:flex; align-items:center; justify-content:center; border:4px solid white; overflow:hidden;"></div>
+                <p style="color:#aaa; font-size:12px;">(Icona del personatge actual)</p>
+            </div>
+
+            <label style="color:#00ffff; font-size:18px;">EL TEU NOM:</label><br>
+            <input type="text" id="input-player-name" placeholder="Escriu el teu nom..." maxlength="12" style="font-size:20px; padding:10px; width:60%; text-align:center; margin-top:5px; border-radius:10px; border:none;">
+            <button onclick="saveName()" style="font-size:18px; padding:10px; background:#00ff00; border:none; border-radius:10px; cursor:pointer; font-weight:bold;">GUARDAR</button>
+            <br><br>
+            <hr style="border-color:#555;">
+            <br>
+            <h3 style="color:#ff00ff;">TRANSFERIR DADES (ID)</h3>
+            <textarea id="data-string" style="width:100%; height:80px; background:#222; color:#0f0; border:1px solid #555; font-family:monospace; font-size:12px; resize:none;" readonly placeholder="Clica 'GENERAR ID' per veure el codi..."></textarea>
+            
+            <div style="display:flex; justify-content:space-between; margin-top:10px; gap:10px;">
+                <button onclick="generateSaveCode()" style="flex:1; padding:10px; background:#ffcc00; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">GENERAR ID</button>
+                <button onclick="loadSaveCode()" style="flex:1; padding:10px; background:#00bcff; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">CARREGAR ID</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOU MENÚ D'AVATARS I SKINS EN GRAELLA (AMPLIAT) -->
+    <div id="menu-avatar" class="menu" style="display:none; flex-direction:row; align-items:flex-start; justify-content:center; padding-top:80px; width:95%; max-width:1500px; margin:0 auto; gap:30px;">
+        <!-- PART ESQUERRA (MÉS AMPLA) -->
+        <div style="flex:1.5; padding:20px; border-right: 3px solid #00ffff; height: 80vh;">
+            <h2 style="color:gold; margin-top:0; font-size: 28px;">SELECCIÓ DE BRAWLER</h2>
+            <div id="avatar-grid-container"></div>
+        </div>
+        
+        <!-- PART DRETA (ARA AMB FONS PER OMPLIR L'ESPAI) -->
+        <div style="flex:1; padding:30px 40px; display:flex; flex-direction:column; align-items:center; height: 80vh; overflow-y:auto; background: rgba(0, 255, 255, 0.05); border-radius: 20px; box-shadow: inset 0 0 20px rgba(0,255,255,0.1);">
+            <div id="avatar-preview" style="font-size: 100px; margin-bottom: 20px; height: 250px;"></div>
+            <h2 id="avatar-name" style="color: gold; margin-bottom: 5px; text-align:center; font-size: 32px;">NOM</h2>
+            <div id="avatar-desc" style="color: #ccc; font-size:16px; text-align:center; margin-bottom: 20px;">Descripció</div>
+            
+            <div style="background:rgba(0,0,0,0.8); padding:20px; border-radius:15px; width:100%; text-align:center; margin-bottom:20px; border:2px solid #444;">
+                <div id="avatar-speed" style="color: #00ffff; font-size: 18px;">Velocitat: 0</div>
+                <div id="avatar-hp" style="color: #32ff32; font-weight:bold; font-size:22px; margin: 10px 0;">Vida màxima: 0</div>
+                <div id="avatar-weapons" style="font-size: 14px; color: gold;">Armes: ...</div>
+            </div>
+            
+            <h3 style="color:#ff00ff; margin-bottom:15px; width:100%; text-align:left; font-size: 22px;">ASPECTES (SKINS)</h3>
+            <div id="skins-container" style="width:100%; display:flex; flex-direction:column; gap:12px;"></div>
+            
+            <button id="action-btn" class="world-btn" style="font-size:22px; padding:20px; background: #00ff00; width:100%; margin-top:30px;">ELEGIR BRAWLER</button>
+        </div>
+    </div>
+
+    <div id="page-rewards" class="menu" style="display:none">
+        <h1 style="color:#ff00ff">SALA DE MISSIONS</h1>
+        <div style="display:flex; gap:20px;">
+            <div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:15px; width:250px; text-align:center; border:2px solid white;">
+                <h3>FÀCIL</h3><p>Guanya 50🏆 en 8 min</p><p style="color:lime">+25 XP</p>
+                <button class="claim-btn" onclick="startMission(8, 50, 25, 30)">ACCEPTAR</button>
+            </div>
+            <div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:15px; width:250px; text-align:center; border:2px solid white;">
+                <h3>DIFÍCIL</h3><p>Guanya 125🏆 en 20 min</p><p style="color:lime">+75 XP</p>
+                <button class="claim-btn" onclick="startMission(20, 125, 75, 60)">ACCEPTAR</button>
+            </div>
+            <div style="background:rgba(255,255,255,0.1); padding:20px; border-radius:15px; width:250px; text-align:center; border:2px solid white;">
+                <h3>DIOS</h3><p>Guanya 200🏆 en 32 min</p><p style="color:lime">+200 XP</p>
+                <button class="claim-btn" onclick="startMission(32, 200, 100, 90)">ACCEPTAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="menu-boss" class="menu" style="display:none">
+        <div id="roulette-display">❓</div>
+        <div id="boss-random-name" style="font-size:30px; color:gold; margin-top:20px;">???</div>
+        <div id="spin-btn" class="world-btn" onclick="spinRoulette()">GIRAR</div>
+    </div>
+
+    <div id="ui">
+        <div id="player-name-ui" class="name-label" style="top: 35px; left: 20px;">JUGADOR</div>
+        <div id="player-ui" class="bar-container"><div id="p-fill" class="bar-fill" style="background:#32ff32"></div></div>
+        <div id="boss-name-ui" class="name-label" style="top: 35px; right: 20px; text-align: right;">BOSS</div>
+        <div id="boss-ui" class="bar-container"><div id="b-fill" class="bar-fill" style="background:#ff0000"></div></div>
+        
+        <div id="weapon-info"></div>
+
+        <div id="weapons-ui" class="inventory-panel">
+            <div id="w0" class="slot unlocked active"><span class="key-hint">1</span>🔫<div class="cooldown-overlay" id="cd-0"></div></div>
+            <div id="w6" class="slot"><span class="key-hint">2</span>🐔<div class="cooldown-overlay" id="cd-6"></div></div>
+            <div id="w4" class="slot"><span class="key-hint">3</span>🥊<div class="cooldown-overlay" id="cd-4"></div></div>
+            <div id="w5" class="slot"><span class="key-hint">4</span>🕸️<div class="cooldown-overlay" id="cd-5"></div></div>
+            <div id="w7" class="slot"><span class="key-hint">5</span>🐱<div class="cooldown-overlay" id="cd-7"></div></div>
+            <div id="w1" class="slot"><span class="key-hint">6</span>🔥<div class="cooldown-overlay" id="cd-1"></div></div>
+            <div id="w2" class="slot"><span class="key-hint">7</span>🚨<div class="cooldown-overlay" id="cd-2"></div></div>
+            <div id="w3" class="slot"><span class="key-hint">8</span>💣<div class="cooldown-overlay" id="cd-3"></div></div>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="endgame-animation" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; background: rgba(0,0,0,0.95); flex-direction: column; justify-content: center; align-items: center;">
+        <svg viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg" style="width: 100%; max-width: 1000px; max-height: 80vh;">
+          <defs>
+            <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#001a33;stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#0a0a0a;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#330000;stop-opacity:1" />
+            </linearGradient>
+            <style>
+              @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+              @keyframes shotBlue { 0% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(800px); opacity: 0; } }
+              @keyframes shotRed { 0% { transform: translateX(0); opacity: 1; } 100% { transform: translateX(-800px); opacity: 0; } }
+              .char { animation: float 3s ease-in-out infinite; }
+              .name-label { fill: white; font-family: Arial; font-size: 10px; font-weight: bold; text-anchor: middle; }
+              .projectile-blue { fill: #00ffff; filter: drop-shadow(0 0 3px cyan); }
+              .projectile-red { fill: #ffea00; filter: drop-shadow(0 0 3px yellow); }
+            </style>
+          </defs>
+          <rect width="1000" height="600" fill="url(#bgGrad)" />
+          <g stroke="rgba(255,255,255,0.05)" stroke-width="1">
+            <line x1="0" y1="500" x2="1000" y2="500" />
+            <line x1="0" y1="540" x2="1000" y2="540" />
+            <line x1="0" y1="580" x2="1000" y2="580" />
+          </g>
+          <text x="500" y="50" fill="white" font-family="Arial Black" font-size="35" text-anchor="middle" style="filter: drop-shadow(0 0 10px cyan);">BRAWL UNIVERSE: ALL-STARS</text>
+          
+          <!-- ESQUERRA -->
+          <g transform="translate(50, 80)">
+            <g class="char" style="animation-delay: 0.1s;"><image href="skinferrantrufa.png" x="0" y="0" width="60" height="60"/><text x="30" y="75" class="name-label">FerranTrufa</text></g>
+            <g class="char" style="animation-delay: 0.3s;"><image href="skintrufa.png" x="100" y="0" width="60" height="60"/><text x="130" y="75" class="name-label">Trufa</text></g>
+            <g class="char" style="animation-delay: 0.5s;"><image href="skingodo.png" x="0" y="100" width="60" height="60"/><text x="30" y="175" class="name-label">ProGodo</text></g>
+            <g class="char" style="animation-delay: 0.2s;"><image href="skinelpepe.png" x="100" y="100" width="60" height="60"/><text x="130" y="175" class="name-label">ElPepe</text></g>
+            <g class="char" style="animation-delay: 0.7s;"><image href="skinsers.png" x="0" y="200" width="60" height="60"/><text x="30" y="275" class="name-label">Sers25</text></g>
+            <g class="char" style="animation-delay: 0.4s;"><image href="skinferran.png" x="100" y="200" width="60" height="60"/><text x="130" y="275" class="name-label">Ferran</text></g>
+            <g class="char" style="animation-delay: 0.9s;"><image href="skinmarc.png" x="0" y="300" width="60" height="60"/><text x="30" y="375" class="name-label">Hablack09</text></g>
+            <g class="char" style="animation-delay: 0.6s;"><image href="blackgoku.png" x="100" y="300" width="60" height="60"/><text x="130" y="375" class="name-label">BlackGoku</text></g>
+            <g class="char" style="animation-delay: 1.1s;"><image href="skinayu.png" x="0" y="400" width="60" height="60"/><text x="30" y="475" class="name-label">AyuMeReck</text></g>
+            <g class="char" style="animation-delay: 0.8s;"><image href="skintomatina.png" x="100" y="400" width="60" height="60"/><text x="130" y="475" class="name-label">Tomatina</text></g>
+          </g>
+          
+          <!-- DRETA (REPARAT FIX DEFINITIU: Es fan servir les variables X autònomes per als elements SVG individuals sense utilitzar `transform` pel desplaçament a part del reflex, així mai més s'amunteguen junts) -->
+          <g transform="translate(800, 80)">
+            <g class="char" style="animation-delay: 0.2s;"><image href="skinadria.png" x="-60" y="0" width="60" height="60" transform="scale(-1, 1)"/><text x="30" y="75" class="name-label">Adredvv</text></g>
+            <g class="char" style="animation-delay: 0.4s;"><image href="skinavap.png" x="-160" y="0" width="60" height="60" transform="scale(-1, 1)"/><text x="130" y="75" class="name-label">AVAP</text></g>
+            <g class="char" style="animation-delay: 0.6s;"><image href="skinstructito.png" x="-60" y="100" width="60" height="60" transform="scale(-1, 1)"/><text x="30" y="175" class="name-label">Structito</text></g>
+            <g class="char" style="animation-delay: 0.1s;"><image href="gatopitufo.png" x="-160" y="100" width="60" height="60" transform="scale(-1, 1)"/><text x="130" y="175" class="name-label">GatoPitufo</text></g>
+            <g class="char" style="animation-delay: 0.8s;"><image href="chipichipi.png" x="-60" y="200" width="60" height="60" transform="scale(-1, 1)"/><text x="30" y="275" class="name-label">Chipi Chipi</text></g>
+            <g class="char" style="animation-delay: 0.3s;"><image href="Skin Sersmeca.png" x="-160" y="200" width="60" height="60" transform="scale(-1, 1)"/><text x="130" y="275" class="name-label">Sers meca</text></g>
+            <g class="char" style="animation-delay: 1.0s;"><image href="skinelpepe.png" x="-60" y="300" width="60" height="60" transform="scale(-1, 1)"/><text x="30" y="375" class="name-label">ElPepe</text></g>
+            <g class="char" style="animation-delay: 0.5s;"><image href="skincomotamuchacho.webp" x="-160" y="300" width="60" height="60" transform="scale(-1, 1)"/><text x="130" y="375" class="name-label">Como Ta Muchacho</text></g>
+            <g class="char" style="animation-delay: 1.2s;"><image href="skintrufa.png" x="-60" y="400" width="60" height="60" transform="scale(-1, 1)"/><text x="30" y="475" class="name-label">Trufa</text></g>
+            <g class="char" style="animation-delay: 0.7s;"><image href="skingodo.png" x="-160" y="400" width="60" height="60" transform="scale(-1, 1)"/><text x="130" y="475" class="name-label">ProGodo</text></g>
+          </g>
+          
+          <!-- PROJECTILS ANIMACIÓ -->
+          <circle r="4" cx="220" cy="110" class="projectile-blue">
+            <animateTransform attributeName="transform" type="translate" from="0 0" to="600 0" dur="1s" repeatCount="indefinite" />
+          </circle>
+          <circle r="4" cx="220" cy="310" class="projectile-blue">
+            <animateTransform attributeName="transform" type="translate" from="0 0" to="600 0" dur="0.8s" begin="0.2s" repeatCount="indefinite" />
+          </circle>
+          <circle r="4" cx="780" cy="210" class="projectile-red">
+            <animateTransform attributeName="transform" type="translate" from="0 0" to="-600 0" dur="1.2s" repeatCount="indefinite" />
+          </circle>
+          <circle r="4" cx="780" cy="410" class="projectile-red">
+            <animateTransform attributeName="transform" type="translate" from="0 0" to="-600 0" dur="0.9s" begin="0.4s" repeatCount="indefinite" />
+          </circle>
+        </svg>
+        <button class="world-btn" onclick="skipAnimation()" style="background: #ff00ff; border: 3px solid white; box-shadow: 0 0 20px #ff00ff; margin-top: 20px;">SALTAR ANIMACIÓ</button>
+    </div>
+
+<script>
+// --- GESTIÓ DE DADES ---
+let copes = parseInt(localStorage.getItem('centes')) || 0;
+let xp = parseFloat(localStorage.getItem('xp')) || 0;
+let unlockedChars = JSON.parse(localStorage.getItem('unlockedChars')) || [1];
+
+// Sistema de Skins i Millores Guardades
+let unlockedSkins = JSON.parse(localStorage.getItem('unlockedSkins')) || {};
+let selectedSkins = JSON.parse(localStorage.getItem('selectedSkins')) || {};
+
+let claimedLevels = JSON.parse(localStorage.getItem('claimedLevels')) || [];
+let playerName = localStorage.getItem('playerName') || "Jugador";
+
+// --- VARIABLES GLOBALS JOC I MAPA ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let gameRunning = false, selectedBoss = null, mouseX = 0, mouseY = 0, isMouseDown = false;
+let player, boss, bullets, bossBullets, keys = {}, curWeapon = 0, curForm = 1, tempSelected = 1;
+let activeMission = null, missionProgressCopes = 0, missionInterval = null;
+
+// Gestió de mapa
+let mapObjects = [];
+let sunActiveUntil = 0;
+let playerInTallGrass = false;
+
+// Imatges del mapa
+const mapImages = {
+    'bloc': new Image(),
+    'hacker': new Image(),
+    'aigua': new Image(),
+    'herba': new Image()
+};
+mapImages['bloc'].src = 'a.png';
+mapImages['hacker'].src = 'b.png';
+mapImages['aigua'].src = 'c.png';
+mapImages['herba'].src = 'd.png';
+
+function rectsIntersect(r1, r2) {
+    return !(r2.x > r1.x + r1.w || r2.x + r2.w < r1.x || r2.y > r1.y + r1.h || r2.y + r2.h < r1.y);
+}
+
+// --- CONFIGURACIÓ AVATARS (AMB SKINS I MILLORES ESTADÍSTIQUES) ---
+const avatars = {
+    1: { name: "FerranTrufa", speed: 4, cost: 0, desc: "Rei dels gossos",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skinferrantrufa.png", hp: 100, weapons: [0,6], costCopes: 0, costXp: 0 },
+             { id: 1, name: "Nada", imgSrc: "skinferrantrufa_pro.png", hp: 150, weapons: [0,6,1], costCopes: 100, costXp: 20 }
+         ] },
+    2: { name: "Trufa", speed: 6, cost: 0, desc: "Equilibrat.",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skintrufa.png", hp: 100, weapons: [0,6], costCopes: 0, costXp: 0 },
+             { id: 1, name: "Mariachi", imgSrc: "trufamexico.png", hp: 130, weapons: [0,6,4], costCopes: 150, costXp: 30 }
+         ] },
+    3: { name: "ProGodo", speed: 6, cost: 20, desc: "Domina corrents.",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skingodo.png", hp: 110, weapons: [0,6,4], costCopes: 0, costXp: 0 },
+             { id: 1, name: "Nada", imgSrc: "skingodo_pro.png", hp: 160, weapons: [0,6,4,5], costCopes: 200, costXp: 40 }
+         ] },
+    4: { name: "ElPepe", speed: 8, cost: 30, desc: "Molt àgil.",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skinelpepe.png", hp: 90, weapons: [0,6,4], costCopes: 0, costXp: 0 },
+             { id: 1, name: "Elpepedios", imgSrc: "elpepedios.png", hp: 140, weapons: [0,6,4,3], costCopes: 250, costXp: 50 }
+         ] },
+    5: { name: "Sers25", speed: 8, cost: 35, desc: "Tanc dels dragons",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skinsers.png", hp: 150, weapons: [0,6,7,3], costCopes: 0, costXp: 0 },
+             { id: 1, name: "Sers meca", imgSrc: "Skin Sersmeca.png", hp: 220, weapons: [0,6,7,3,1], costCopes: 300, costXp: 60 }
+         ] },
+    6: { name: "Ferran", speed: 7, cost: 40, desc: "Explorador marí.",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skinferran.png", hp: 100, weapons: [0,6], costCopes: 0, costXp: 0 },
+             { id: 1, name: "Mariachi", imgSrc: "ferranmexico.png", hp: 150, weapons: [0,6,2], costCopes: 350, costXp: 70 }
+         ] },
+    7: { name: "Hablack09", speed: 9, cost: 50, desc: "Depredador alfa.",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skinmarc.png", hp: 120, weapons: [0,6,4,7], costCopes: 0, costXp: 0 },
+             { id: 1, name: "Hablack Omega", imgSrc: "Skin Hablackmeca.png", hp: 180, weapons: [0,6,4,7,3], costCopes: 400, costXp: 80 }
+         ] },
+    8: { name: "BlackGoku", speed: 11, cost: 0, desc: "El taekwondo fa volar.",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "blackgoku.png", hp: 110, weapons: [0,6,7,3,4], costCopes: 0, costXp: 0 },
+             { id: 1, name: "goku4", imgSrc: "goku4.webp", hp: 170, weapons: [0,6,7,3,4,1], costCopes: 450, costXp: 90 }
+         ] },
+    9: { name: "AyuMeReck", speed: 10, cost: 60, desc: "Velocitat alta.",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skinayu.png", hp: 100, weapons: [0,6,2,7], costCopes: 0, costXp: 0 },
+             { id: 1, name: "Reck Suprem", imgSrc: "skinayu_pro.png", hp: 160, weapons: [0,6,2,7,5], costCopes: 500, costXp: 100 }
+         ] },
+    10: { name: "Tomatina", speed: 10, cost: 70, desc: "Explosiva! Bonus x1.2", multiplier: 1.2,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "skintomatina.png", hp: 120, weapons: [0,1,3,7], costCopes: 0, costXp: 0 },
+              { id: 1, name: "Mariachi", imgSrc: "tomatinamexico.png", hp: 180, weapons: [0,1,3,7,2], costCopes: 600, costXp: 120 }
+          ] },
+    11: { name: "Adredvv", speed: 17, cost: 0, desc: "LLEGENDARI: Bonus x1.3", multiplier: 1.3,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "skinadria.png", hp: 200, weapons: [0,1,2,5,6,7], costCopes: 0, costXp: 0 },
+              { id: 1, name: "Adribinary", imgSrc: "adribinary.png", hp: 300, weapons: [0,1,2,5,6,7,3,4], costCopes: 1500, costXp: 300 }
+          ] },
+    12: { name: "AVAP", speed: 16, cost: 750, desc: "Rei del Mar. Bonus x1.5", multiplier: 1.5,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "skinavap.png", hp: 220, weapons: [0,3,4,6,7], costCopes: 0, costXp: 0 },
+              { id: 1, name: "AVAP de les Foses", imgSrc: "skinavap_pro.png", hp: 320, weapons: [0,3,4,6,7,1,2], costCopes: 2000, costXp: 400 }
+          ] },
+    13: { name: "Structito", speed: 15, cost: 1000, desc: "LLEGENDARI: Guanya x2 Copes!", multiplier: 2,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "skinstructito.png", hp: 250, weapons: [0,1,2,3,4,5,6,7], costCopes: 0, costXp: 0 },
+              { id: 1, name: "Structito Ninja", imgSrc: "skinstructitoninja.png", hp: 400, weapons: [0,1,2,3,4,5,6,7], costCopes: 3000, costXp: 600 }
+          ] },
+    14: { name: "GatoPitufo", speed: 17, cost: 1500, desc: "Els gats de 2023 son x3", multiplier: 3,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "gatopitufo.png", hp: 150, weapons: [0,1,3,4,5,7], costCopes: 0, costXp: 0 },
+              { id: 1, name: "Gat Màgic", imgSrc: "gatopitufo_pro.png", hp: 250, weapons: [0,1,3,4,5,7,2,6], costCopes: 4500, costXp: 800 }
+          ] },
+    15: { name: "Chipi Chipi", speed: 20, cost: 2000, desc: "Chipi chipi chapa chapa x3.5", multiplier: 3.5,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "chipichipi.png", hp: 200, weapons: [0,1,2,3,4,5,6,7], costCopes: 0, costXp: 0 },
+              { id: 1, name: "Mariachi", imgSrc: "chipimexico.png", hp: 350, weapons: [0,1,2,3,4,5,6,7], costCopes: 6000, costXp: 1000 }
+          ] },
+    16: { name: "Hablackvtuber", speed: 12, cost: 300, desc: "", multiplier: 1.5,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "Skin Hablackvtuber.png", hp: 200, weapons: [0,1,2,3,4,5,6,7], costCopes: 0, costXp: 0 },
+              { id: 1, name: "Nada", imgSrc: "chipichipi_pro.png", hp: 350, weapons: [0,1,2,3,4,5,6,7], costCopes: 6000, costXp: 1000 }
+          ] },
+    17: { name: "Catbanana", speed: 12, cost: 1500, desc: "bana bana bana", multiplier: 2.3,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "catbanana.png", hp: 200, weapons: [0,1,2,3,4,5,6,7], costCopes: 0, costXp: 0 },
+              { id: 1, name: "Nada", imgSrc: "chipichipi_pro.png", hp: 350, weapons: [0,1,2,3,4,5,6,7], costCopes: 6000, costXp: 1000 }
+          ] },      
+         
+};
+
+// Inicialització de seguretat per a skins de personatges desbloquejats
+unlockedChars.forEach(charId => {
+    if (!unlockedSkins[charId]) unlockedSkins[charId] = [0];
+    if (selectedSkins[charId] === undefined) selectedSkins[charId] = 0;
+});
+
+// --- PRE-CARREGA D'IMATGES ---
+for (let id in avatars) {
+    avatars[id].skins.forEach(skin => {
+        skin.imgObj = new Image();
+        skin.imgObj.src = skin.imgSrc;
+    });
+}
+
+// --- CONFIGURACIÓ ARMES ---
+const weapons = {
+    0: { emoji: "🔫", dmg: 20, speed: 15, rate: 400, unlockPct: 100, unlocked: true, name: "Pistola" },
+    6: { emoji: "🐔", dmg: 40, speed: 15, rate: 300, unlockPct: 90, unlocked: false, desc: "Gallina Metralleta", name: "Gallina" },
+    4: { emoji: "🥊", dmg: 0, speed: 12, rate: 20000, unlockPct: 80, unlocked: false, type: 'punch', desc: "Puny", name: "Puny" },
+    5: { emoji: "🕸️", dmg: 0, speed: 10, rate: 20000, unlockPct: 70, unlocked: false, type: 'cage', desc: "Gàbia", name: "Gàbia" },
+    7: { emoji: "🐱", dmg: 0, speed: 20, rate: 25000, unlockPct: 60, unlocked: false, type: 'cat', desc: "Gat Rebotador", name: "Gat" },
+    1: { emoji: "🔥", dmg: 12, speed: 20, rate: 100, unlockPct: 50, unlocked: false, name: "Foc" },
+    2: { emoji: "🚨", dmg: 150, speed: 0, rate: 1000, unlockPct: 40, unlocked: false, isMine: true, name: "Mina" },
+    3: { emoji: "💣", dmg: 100, speed: 10, rate: 800, unlockPct: 30, unlocked: false, name: "Granada" },
+    lastFired: {} 
+};
+
+// --- CONFIGURACIÓ BOSSES (UNIFICAT) ---
+const allBosses = [
+    { name: "Como Ta Muchacho", imgSrc: "skincomotamuchacho.webp", projectile: "🎱", cd: 2500, dmg: 30, speed: 2 },
+    { name: "Skibidi Toilet", imgSrc: "skinskiiditoilet.webp", projectile: "💩", cd: 800, dmg: 25, speed: 2 },
+    { name: "Sumikata", imgSrc: "skinsumikata.png", projectile: "⚠️", cd: 2500, dmg: 30, speed: 2 },
+    { name: "Demogorgon", imgSrc: "skindemogorgon.png", projectile: "🩸", cd: 2200, dmg: 20, speed: 2 },
+    { name: "Pou", imgSrc: "skinpou.png", projectile: "💩", cd: 2200, dmg: 20, speed: 2 },
+    { name: "Pocoyo.exe", imgSrc: "skinpocoyo.png", projectile: "🛒", cd: 2200, dmg: 20, speed: 2 },
+    { name: "Papaleta dame paleta", imgSrc: "papaleta.webp", projectile: "🍭", cd: 2200, dmg: 20, speed: 1 },
+    { name: "Demoniosumo", imgSrc: "demoniosumo.png", projectile: "🍙", cd: 2200, dmg: 20, speed: 2 },
+    { name: "Troll", imgSrc: "skintroll.png", projectile: "🤡", cd: 2200, dmg: 20, speed: 2 },
+    { name: "Pomni", imgSrc: "pomni.png", projectile: "🪇", cd: 2200, dmg: 20, speed: 2 },
+];
+
+for (let boss of allBosses) {
+    boss.imgObj = new Image();
+    boss.imgObj.src = boss.imgSrc;
+}
+
+// --- CONFIGURACIÓ NIVELLS ---
+const levelRewards = [];
+for (let i = 1; i <= 100; i++) {
+    let copesReq = i === 1 ? 50 : 100 + ((i - 2) * 100);
+    let xpRew = i === 1 ? 10 : parseFloat(((levelRewards[i-2]?.xp || 10) * 1.5).toFixed(1));
+    levelRewards.push({ id: i, copes: copesReq, xp: xpRew, text: `Nivell ${i}` });
+}
+
+// --- FUNCIONS UI I SISTEMES ---
+function updateUI() {
+    localStorage.setItem('centes', copes);
+    localStorage.setItem('xp', xp);
+    document.getElementById('centes-count').innerText = Math.floor(copes);
+    document.getElementById('xp-count').innerText = xp.toFixed(1);
+}
+
+function showUnlockMessage(text, emoji) {
+    const div = document.createElement("div");
+    div.innerHTML = `${emoji} ${text}`;
+    div.style.position = "absolute";
+    div.style.top = "30%";
+    div.style.left = "50%";
+    div.style.transform = "translate(-50%, -50%)";
+    div.style.padding = "20px 40px";
+    div.style.background = "rgba(0,0,0,0.9)";
+    div.style.border = "4px solid gold";
+    div.style.color = "gold";
+    div.style.fontSize = "28px";
+    div.style.borderRadius = "20px";
+    div.style.zIndex = 2000;
+    div.style.pointerEvents = "none";
+    div.style.textAlign = "center";
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 2500);
+}
+
+function checkWeaponUnlocks() {
+    let bossLifePct = (boss.hp / boss.maxHp) * 100;
+    
+    for (let id in weapons) {
+        if(id === "lastFired") continue;
+        let w = weapons[id];
+        let slot = document.getElementById('w' + id);
+        
+        if(slot.style.display === 'none') continue;
+        
+        if (bossLifePct <= w.unlockPct) {
+            if (!w.unlocked) {
+                showUnlockMessage(`NOVA ARMA: ${w.name}`, "🔓");
+                w.unlocked = true;
+                slot.classList.add('unlocked');
+            }
+        } else if (id != 0) {
+            w.unlocked = false;
+            slot.classList.remove('unlocked');
+        }
+        
+        if (w.unlocked && weapons.lastFired[id]) {
+            let elapsed = Date.now() - weapons.lastFired[id];
+            let pct = Math.max(0, 100 - (elapsed / w.rate * 100));
+            let cdOverlay = document.getElementById('cd-' + id);
+            if(cdOverlay) cdOverlay.style.height = pct + "%";
+        }
+    }
+}
+
+function generateMapObjects() {
+    mapObjects = [];
+    let safeDist = 200; 
+    
+    // Funció per generar instàncies de mapes que no trepitgin al jugador ni altres objectes
+    const addObj = (type, count, minW, maxW, minH, maxH) => {
+        for(let i=0; i < count; i++) {
+            let w = minW + Math.random()*(maxW-minW);
+            let h = (type === 'bloc' || type === 'hacker') ? w : minH + Math.random()*(maxH-minH); // Els blocs els fem quadrats
+            let x, y;
+            let valid = false;
+            let tries = 0;
+            do {
+                x = Math.random() * (canvas.width - w);
+                y = Math.random() * (canvas.height - h);
+                let newObj = {x, y, w, h};
+                
+                // Comprovar distància segura de l'spawn del jugador i del boss
+                let spawnSafe = (Math.hypot(x + w/2 - 200, y + h/2 - canvas.height/2) > safeDist) && 
+                                (Math.hypot(x + w/2 - (canvas.width-200), y + h/2 - canvas.height/2) > safeDist);
+                
+                // Comprovar col·lisions amb altres objectes del mapa ja creats perquè no s'encavalquin
+                let overlap = false;
+                for (let existing of mapObjects) {
+                    if (rectsIntersect(newObj, existing)) {
+                        overlap = true;
+                        break;
+                    }
+                }
+                
+                valid = spawnSafe && !overlap;
+                tries++;
+            } while(!valid && tries < 500);
+            
+            if (valid) mapObjects.push({type, x, y, w, h});
+        }
+    };
+    
+    // Generar els 4 tipus d'objectes (Bloc, Bloc Hacker, Aigua, Herba)
+    addObj('bloc', 4, 80, 120, 80, 120); 
+    addObj('hacker', 3, 80, 120, 80, 120); 
+    addObj('aigua', 5, 120, 250, 120, 250); 
+    addObj('herba', 6, 150, 300, 150, 300); 
+}
+
+function rectCircleIntersect(rect, cx, cy, cr) {
+    let testX = Math.max(rect.x, Math.min(cx, rect.x + rect.w));
+    let testY = Math.max(rect.y, Math.min(cy, rect.y + rect.h));
+    return Math.hypot(cx - testX, cy - testY) < cr;
+}
+
+function checkSolid(px, py, r, typesToCheck) {
+    for (let obj of mapObjects) {
+        if (typesToCheck.includes(obj.type)) {
+            if (rectCircleIntersect(obj, px, py, r)) return true;
+        }
+    }
+    return false;
+}
+
+// --- GAME LOOP ---
+function startGame() {
+    document.querySelectorAll('.menu').forEach(m => m.style.display = 'none');
+    document.getElementById('ui').style.display = 'block';
+    canvas.style.display = 'block'; 
+    canvas.width = window.innerWidth; 
+    canvas.height = window.innerHeight;
+    
+    document.getElementById('player-name-ui').innerText = playerName;
+
+    let currentSkinId = selectedSkins[curForm] || 0;
+    let activeSkin = avatars[curForm].skins[currentSkinId];
+
+    player = { x: 200, y: canvas.height/2, hp: activeSkin.hp, maxHp: activeSkin.hp, paralyzedUntil: 0 };
+    boss = { 
+        x: canvas.width-200, y: canvas.height/2, 
+        hp: 2000, maxHp: 2000, 
+        lastAttack: 0, currentEmoji: selectedBoss.projectile,
+        isStunned: false, stunUntil: 0, reflectProjectiles: false,
+        wanderAngle: null
+    };
+    
+    bullets = []; 
+    bossBullets = []; 
+    curWeapon = 0;
+    weapons.lastFired = {};
+    sunActiveUntil = 0;
+    
+    generateMapObjects(); // Generar els elements interactius del mapa
+    
+    const allowed = activeSkin.weapons;
+    for(let id in weapons) {
+        if(id === "lastFired") continue;
+        weapons[id].unlocked = (id == 0);
+        weapons.lastFired[id] = 0;
+        let slot = document.getElementById('w'+id);
+        
+        if(slot) {
+            slot.classList.remove('unlocked', 'active');
+            if(allowed.includes(parseInt(id))) {
+                slot.style.display = 'flex';
+                if(id == 0) slot.classList.add('unlocked', 'active');
+            } else {
+                slot.style.display = 'none';
+            }
+        }
+    }
+    
+    gameRunning = true; 
+    requestAnimationFrame(draw);
+}
+
+function draw() {
+    if (!gameRunning) return;
+    const now = Date.now();
+    
+    // FONS MÉS NEUTRE/FOSC
+    ctx.fillStyle = "#0d0d15"; 
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // GRID DE FONS
+    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    ctx.lineWidth = 1;
+    for(let i=0; i<canvas.width; i+=50) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
+    for(let i=0; i<canvas.height; i+=50) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); ctx.stroke(); }
+    
+    // ESTAT DE L'HERBA (5 segons gran, 1 segon petita)
+    let isGrassTall = (now % 6000) < 5000;
+    playerInTallGrass = false;
+    
+    // DIBUIXAR ELS ELEMENTS DEL MAPA
+    for (let obj of mapObjects) {
+        let img = mapImages[obj.type];
+        
+        // Comprovem si la imatge ha carregat correctament
+        if (img && img.complete && img.naturalWidth !== 0) {
+            if (obj.type === 'herba') {
+                ctx.globalAlpha = isGrassTall ? 1.0 : 0.4; // 0.4 fa que es vegi "petita" (transparent)
+                ctx.drawImage(img, obj.x, obj.y, obj.w, obj.h);
+                ctx.globalAlpha = 1.0;
+            } else {
+                ctx.drawImage(img, obj.x, obj.y, obj.w, obj.h);
+            }
+        } else {
+            // Fallback per si les imatges no es troben
+            if (obj.type === 'aigua') {
+                ctx.fillStyle = 'rgba(0, 150, 255, 0.4)';
+                ctx.beginPath();
+                ctx.roundRect(obj.x, obj.y, obj.w, obj.h, 30);
+                ctx.fill();
+            } else if (obj.type === 'herba') {
+                ctx.fillStyle = isGrassTall ? 'rgba(34, 139, 34, 0.8)' : 'rgba(144, 238, 144, 0.4)';
+                ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                ctx.strokeStyle = isGrassTall ? '#004d00' : '#3cb371';
+                ctx.lineWidth = 2;
+                for(let i=0; i<obj.w/25; i++) {
+                    ctx.beginPath(); 
+                    ctx.moveTo(obj.x + 10 + i*25, obj.y + 10); 
+                    ctx.lineTo(obj.x + 5 + i*25, obj.y + obj.h - 10); 
+                    ctx.stroke();
+                }
+            } else if (obj.type === 'bloc') {
+                ctx.fillStyle = '#666';
+                ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(obj.x, obj.y, obj.w, obj.h);
+            } else if (obj.type === 'hacker') {
+                ctx.fillStyle = '#000';
+                ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                ctx.strokeStyle = '#0f0';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(obj.x, obj.y, obj.w, obj.h);
+                ctx.fillStyle = '#0f0';
+                ctx.font = "bold 20px monospace";
+                ctx.textAlign = "center";
+                ctx.fillText("< />", obj.x + obj.w/2, obj.y + obj.h/2);
+            }
+        }
+    }
+    
+    const speed = avatars[curForm].speed;
+    
+    // LÒGICA I MOVIMENT DEL JUGADOR
+    if (player.paralyzedUntil && now < player.paralyzedUntil) {
+        ctx.fillStyle = 'yellow';
+        ctx.font = "bold 20px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("⚡PARALITZAT⚡", player.x, player.y - 60);
+    } else {
+        let dx = 0, dy = 0;
+        if (keys['w']) dy -= 1; if (keys['s']) dy += 1;
+        if (keys['a']) dx -= 1; if (keys['d']) dx += 1;
+        
+        if (dx !== 0 || dy !== 0) { 
+            let mag = Math.sqrt(dx*dx+dy*dy); 
+            let moveX = (dx/mag)*speed;
+            let moveY = (dy/mag)*speed;
+            
+            // Check Col·lisions de Murs
+            if (!checkSolid(player.x + moveX, player.y, 30, ['bloc', 'hacker'])) player.x += moveX;
+            if (!checkSolid(player.x, player.y + moveY, 30, ['bloc', 'hacker'])) player.y += moveY;
+            
+            player.x = Math.max(20, Math.min(canvas.width-20, player.x)); 
+            player.y = Math.max(20, Math.min(canvas.height-20, player.y));
+        }
+
+        // Determinar si estem dins l'aigua o herba
+        for (let obj of mapObjects) {
+            if (obj.type === 'aigua') {
+                if (rectCircleIntersect(obj, player.x, player.y, 30)) {
+                    if (!player.paralyzedUntil || now > player.paralyzedUntil + 1000) {
+                        player.paralyzedUntil = now + 5000;
+                    }
+                }
+            } else if (obj.type === 'herba') {
+                if (isGrassTall && rectCircleIntersect(obj, player.x, player.y, 30)) {
+                    playerInTallGrass = true;
+                }
+            }
+        }
+    }
+    
+    // LÒGICA DEL BOSS
+    if (boss.isStunned && now > boss.stunUntil) {
+        boss.isStunned = false;
+        boss.reflectProjectiles = false;
+    }
+
+    if (!boss.isStunned) {
+        let angleToPlayer;
+        
+        if (playerInTallGrass) {
+            // El Boss perd el seguiment i vaga per la pantalla si estàs dins l'herba gran
+            if (boss.wanderAngle === null || Math.random() < 0.02) boss.wanderAngle = Math.random() * Math.PI * 2;
+            angleToPlayer = boss.wanderAngle;
+        } else {
+            boss.wanderAngle = null;
+            angleToPlayer = Math.atan2(player.y-boss.y, player.x-boss.x);
+        }
+        
+        let bx = boss.x + Math.cos(angleToPlayer) * selectedBoss.speed; 
+        let by = boss.y + Math.sin(angleToPlayer) * selectedBoss.speed;
+        
+        // El boss només xoca amb el "Bloc Hacker", pot travessar blocs normals
+        if (!checkSolid(bx, boss.y, 60, ['hacker'])) boss.x = bx; 
+        if (!checkSolid(boss.x, by, 60, ['hacker'])) boss.y = by;
+        
+        boss.x = Math.max(60, Math.min(canvas.width-60, boss.x));
+        boss.y = Math.max(60, Math.min(canvas.height-60, boss.y));
+        
+        if (!playerInTallGrass && now - boss.lastAttack > selectedBoss.cd) {
+            bossBullets.push({ x: boss.x, y: boss.y, vx: Math.cos(angleToPlayer)*7, vy: Math.sin(angleToPlayer)*7, emoji: selectedBoss.projectile });
+            boss.lastAttack = now;
+        }
+    }
+    
+    // PODER DEL SOL (EVAPORACIÓ D'AIGUA)
+    if (sunActiveUntil && now < sunActiveUntil) {
+        ctx.fillStyle = 'rgba(255, 255, 0, 0.4)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white';
+        ctx.font = "bold 60px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("☀️ EVAPORACIÓ!", canvas.width/2, canvas.height/4);
+    }
+    
+    // DISPARAR
+    if (isMouseDown && (!player.paralyzedUntil || now >= player.paralyzedUntil)) {
+        let w = weapons[curWeapon];
+        let lastF = weapons.lastFired[curWeapon] || 0;
+        
+        if (w.unlocked && now - lastF > w.rate) {
+            let angle = Math.atan2(mouseY-player.y, mouseX-player.x);
+            let projectile = {
+                x: player.x, y: player.y,
+                vx: w.speed === 0 ? 0 : Math.cos(angle)*w.speed,
+                vy: w.speed === 0 ? 0 : Math.sin(angle)*w.speed,
+                emoji: w.emoji, dmg: w.dmg,
+                weaponId: curWeapon,
+                creationTime: now,
+                rebounces: 0
+            };
+            bullets.push(projectile);
+            weapons.lastFired[curWeapon] = now;
+        }
+    }
+    
+    if (curWeapon == 5) {
+        ctx.beginPath();
+        ctx.setLineDash([10, 10]);
+        ctx.strokeStyle = "rgba(0, 255, 255, 0.4)";
+        ctx.lineWidth = 2;
+        ctx.moveTo(player.x, player.y);
+        ctx.lineTo(player.x + (mouseX-player.x)*10, player.y + (mouseY-player.y)*10);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    // --- DIBUIXAR JUGADOR ---
+    let currentSkinId = selectedSkins[curForm] || 0;
+    let activeSkin = avatars[curForm].skins[currentSkinId];
+    
+    if (activeSkin.imgObj && activeSkin.imgObj.complete && activeSkin.imgObj.naturalWidth !== 0) {
+        ctx.save();
+        if (mouseX < player.x) {
+            ctx.translate(player.x + 40, player.y - 40);
+            ctx.scale(-1, 1);
+            ctx.drawImage(activeSkin.imgObj, 0, 0, 80, 80);
+        } else {
+            ctx.drawImage(activeSkin.imgObj, player.x - 40, player.y - 40, 80, 80);
+        }
+        ctx.restore();
+    } else {
+        ctx.fillStyle = "#555";
+        ctx.fillRect(player.x - 40, player.y - 40, 80, 80);
+        ctx.fillStyle = "white"; ctx.font = "14px Arial"; ctx.textAlign = "center";
+        ctx.fillText(activeSkin.name, player.x, player.y);
+    }
+    
+    // --- DIBUIXAR BOSS ---
+    if(boss.isStunned) {
+        ctx.strokeStyle = boss.reflectProjectiles ? "cyan" : "yellow";
+        ctx.lineWidth = 5;
+        ctx.strokeRect(boss.x - 60, boss.y - 60, 120, 120);
+    }
+    if (selectedBoss.imgObj && selectedBoss.imgObj.complete && selectedBoss.imgObj.naturalWidth !== 0) {
+        let size = selectedBoss.size || 120;
+        ctx.drawImage(selectedBoss.imgObj, boss.x - size / 2, boss.y - size / 2, size, size);
+    } else {
+        ctx.fillStyle = "red";
+        ctx.fillRect(boss.x - 60, boss.y - 60, 120, 120);
+    }
+    
+    // --- BALES JUGADOR ---
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        let b = bullets[i];
+        let w = weapons[b.weaponId];
+        
+        // Rebotar a Blocs Hacker
+        for (let obj of mapObjects) {
+            if (obj.type === 'hacker') {
+                if (b.x > obj.x && b.x < obj.x + obj.w && b.y > obj.y && b.y < obj.y + obj.h) {
+                    b.vx *= -1; b.vy *= -1;
+                    b.x += b.vx; b.y += b.vy;
+                }
+            }
+        }
+        
+        b.x += b.vx; b.y += b.vy;
+        
+        if (w.type === 'cage' || w.type === 'cat') {
+            if (b.x <= 0 || b.x >= canvas.width) { b.vx *= -1; b.rebounces++; }
+            if (b.y <= 0 || b.y >= canvas.height) { b.vy *= -1; b.rebounces++; }
+        }
+        
+        if (w.type === 'cat' && now - b.creationTime > 10000) { bullets.splice(i, 1); continue; }
+        
+        ctx.font = "30px Arial"; ctx.textAlign = "center"; ctx.fillText(b.emoji, b.x, b.y);
+        
+        let dist = Math.hypot(b.x-boss.x, b.y-boss.y);
+        let hitRadius = (selectedBoss.size || 120) / 2;
+        
+        if (dist < hitRadius) {
+            let hit = false;
+            if (w.type === 'punch') {
+                boss.x = (b.vx > 0) ? canvas.width - 100 : 100; 
+                boss.y = (b.vy > 0) ? canvas.height - 100 : 100;
+                boss.isStunned = true; boss.stunUntil = now + 10000;
+                hit = true; showUnlockMessage("BOSS CLAVAT!", "😵");
+            }
+            else if (w.type === 'cage') {
+                if (b.rebounces >= 1) {
+                    boss.isStunned = true; boss.reflectProjectiles = true; boss.stunUntil = now + 5000;
+                    hit = true; showUnlockMessage("BOSS ATRAPAT!", "🕸️");
+                }
+            }
+            else if (w.type === 'cat') { boss.hp -= (boss.maxHp * 0.20); hit = true; }
+            else { boss.hp -= b.dmg; hit = true; }
+            
+            if (hit) bullets.splice(i, 1);
+        }
+        else if ((w.type !== 'cage' && w.type !== 'cat') && (b.x < -50 || b.x > canvas.width+50 || b.y < -50 || b.y > canvas.height+50)) {
+            bullets.splice(i, 1);
+        }
+    }
+    
+    // --- BALES BOSS ---
+    for (let i = bossBullets.length - 1; i >= 0; i--) {
+        let b = bossBullets[i];
+        
+        // Rebotar a Blocs Hacker
+        for (let obj of mapObjects) {
+            if (obj.type === 'hacker') {
+                if (b.x > obj.x && b.x < obj.x + obj.w && b.y > obj.y && b.y < obj.y + obj.h) {
+                    b.vx *= -1; b.vy *= -1;
+                    b.x += b.vx; b.y += b.vy;
+                }
+            }
+        }
+
+        if (boss.reflectProjectiles) {
+            let angleToBoss = Math.atan2(boss.y - b.y, boss.x - b.x);
+            b.vx = Math.cos(angleToBoss) * 10; b.vy = Math.sin(angleToBoss) * 10;
+            if (Math.hypot(b.x-boss.x, b.y-boss.y) < 60) { boss.hp -= 30; bossBullets.splice(i, 1); continue; }
+        }
+        
+        b.x += b.vx; b.y += b.vy; 
+        ctx.font = "30px Arial"; ctx.textAlign = "center"; ctx.fillText(b.emoji, b.x, b.y);
+        
+        if (!boss.reflectProjectiles && Math.hypot(b.x-player.x, b.y-player.y) < 40) { 
+            player.hp -= selectedBoss.dmg; 
+            bossBullets.splice(i, 1); 
+        }
+    }
+    
+    document.getElementById('p-fill').style.width = Math.max(0, (player.hp/player.maxHp)*100) + "%";
+    document.getElementById('b-fill').style.width = Math.max(0, (boss.hp/boss.maxHp)*100) + "%";
+    checkWeaponUnlocks();
+
+    if (player.hp <= 0 || boss.hp <= 0) {
+        gameRunning = false;
+        if(boss.hp <= 0) {
+            let mult = avatars[curForm].multiplier || 1;
+            let totalGuanyat = Math.floor(9 * mult); 
+            copes += totalGuanyat;
+            if(activeMission) missionProgressCopes += totalGuanyat;
+            alert("VICTÒRIA! +" + totalGuanyat + " 🏆");
+        } else { 
+            copes = Math.max(0, copes - 12); 
+            alert("MORT! -12 🏆"); 
+        }
+        updateUI(); 
+        canvas.style.display = 'none'; 
+        document.getElementById('ui').style.display = 'none'; 
+        document.getElementById('endgame-animation').style.display = 'flex';
+    } else {
+        requestAnimationFrame(draw);
+    }
+}
+
+// --- MENÚ D'AVATARS I ASPECTES (SKINS) EN GRAELLA ---
+function openAvatarMenu() {
+    document.getElementById('menu-world').style.display = 'none';
+    document.getElementById('menu-avatar').style.display = 'flex';
+    document.getElementById('back-to-world').style.display = 'block';
+    
+    let gridContainer = document.getElementById('avatar-grid-container');
+    gridContainer.innerHTML = "";
+    
+    for(let id in avatars) {
+        let av = avatars[id];
+        let isUnlocked = unlockedChars.includes(parseInt(id));
+        let currentSkinId = (isUnlocked && selectedSkins[id] !== undefined) ? selectedSkins[id] : 0;
+        let activeSkin = av.skins[currentSkinId];
+        
+        let card = document.createElement('div');
+        card.id = 'card-' + id;
+        card.className = "avatar-card";
+        if(id == tempSelected) card.classList.add('selected');
+        
+        let lockOverlay = !isUnlocked ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; font-size:30px; border-radius:8px;">🔒</div>` : "";
+        
+        card.innerHTML = `
+            <div style="position:relative; width:80px; height:80px; margin:0 auto;">
+                <img src="${activeSkin.imgSrc}" onerror="this.style.opacity='0.2'">
+                ${lockOverlay}
+            </div>
+            <div style="font-size:12px; margin-top:8px; font-weight:bold; color:${isUnlocked ? 'white' : '#777'};">${av.name}</div>
+        `;
+        
+        card.onclick = () => { 
+            tempSelected = id; 
+            updateAvatarPreview(); 
+        };
+        gridContainer.appendChild(card);
+    }
+    updateAvatarPreview();
+}
+
+function updateAvatarPreview() {
+    let av = avatars[tempSelected];
+    let isUnlocked = unlockedChars.includes(parseInt(tempSelected));
+    
+    if (isUnlocked && !unlockedSkins[tempSelected]) unlockedSkins[tempSelected] = [0];
+    if (isUnlocked && selectedSkins[tempSelected] === undefined) selectedSkins[tempSelected] = 0;
+    
+    let currentSkinId = isUnlocked ? selectedSkins[tempSelected] : 0;
+    let activeSkin = av.skins[currentSkinId];
+    
+    document.querySelectorAll('.avatar-card').forEach(c => c.classList.remove('selected'));
+    let activeCard = document.getElementById('card-' + tempSelected);
+    if(activeCard) activeCard.classList.add('selected');
+    
+    let previewDiv = document.getElementById('avatar-preview');
+    previewDiv.innerHTML = `<img src="${activeSkin.imgSrc}" style="height:250px; object-fit:contain; animation: float 3s infinite ease-in-out;" onerror="this.style.opacity='0.2'">`;
+    
+    document.getElementById('avatar-name').innerText = av.name;
+    document.getElementById('avatar-desc').innerText = av.desc;
+    document.getElementById('avatar-speed').innerText = "Velocitat: " + av.speed;
+    document.getElementById('avatar-hp').innerText = "Vida màxima: " + activeSkin.hp;
+    
+    let wepNames = activeSkin.weapons.map(id => weapons[id].name).join(', ');
+    document.getElementById('avatar-weapons').innerText = "Armes de l'aspecte: " + wepNames;
+    
+    let btnAction = document.getElementById('action-btn');
+    if (isUnlocked) {
+        btnAction.innerText = "JUGAR AMB " + av.name.toUpperCase();
+        btnAction.style.background = "#00bcff";
+        btnAction.onclick = () => {
+            curForm = tempSelected;
+            document.getElementById('menu-avatar').style.display = 'none';
+            document.getElementById('menu-boss').style.display = 'flex';
+            document.getElementById('back-to-world').style.display = 'none';
+        };
+    } else {
+        btnAction.innerText = "COMPRAR BRAWLER (" + av.cost + " 🏆)";
+        btnAction.style.background = "#ffcc00";
+        btnAction.onclick = () => {
+            if(copes >= av.cost) {
+                copes -= av.cost;
+                unlockedChars.push(parseInt(tempSelected));
+                unlockedSkins[tempSelected] = [0];
+                selectedSkins[tempSelected] = 0;
+                localStorage.setItem('unlockedChars', JSON.stringify(unlockedChars));
+                localStorage.setItem('unlockedSkins', JSON.stringify(unlockedSkins));
+                localStorage.setItem('selectedSkins', JSON.stringify(selectedSkins));
+                updateUI();
+                openAvatarMenu();
+                alert("Brawler desbloquejat!");
+            } else {
+                alert("No tens prous copes!");
+            }
+        };
+    }
+
+    let skinsContainer = document.getElementById('skins-container');
+    if (!isUnlocked) {
+        skinsContainer.innerHTML = "<div style='color:#777; font-size:16px; text-align:center;'>Desbloqueja primer el Brawler per veure'n els aspectes.</div>";
+    } else {
+        skinsContainer.innerHTML = "";
+        av.skins.forEach(skin => {
+            let isSkinUnlocked = unlockedSkins[tempSelected].includes(skin.id);
+            let isSkinEquipped = selectedSkins[tempSelected] === skin.id;
+            
+            let div = document.createElement('div');
+            div.className = "skin-row";
+            if(isSkinEquipped) div.style.border = "2px solid #00ffff";
+            
+            let btnHTML = "";
+            if (isSkinEquipped) {
+                btnHTML = `<button disabled style="background:#444; color:white; padding:10px 15px; border-radius:8px; border:none; font-weight:bold;">EQUIPAT</button>`;
+            } else if (isSkinUnlocked) {
+                btnHTML = `<button onclick="equipSkin(${tempSelected}, ${skin.id})" style="background:#00bcff; color:white; padding:10px 15px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">EQUIPAR</button>`;
+            } else {
+                btnHTML = `<button onclick="buySkin(${tempSelected}, ${skin.id}, ${skin.costCopes}, ${skin.costXp})" style="background:#ffcc00; color:black; font-weight:bold; padding:10px 15px; border-radius:8px; border:none; cursor:pointer;">${skin.costCopes}🏆 + ${skin.costXp}⭐</button>`;
+            }
+            
+            let extraWeaponsText = "";
+            if(skin.id > 0) extraWeaponsText = `<br><span style="color:#00bcff; font-size:12px;">+ Millora d'Arsenal</span>`;
+
+            div.innerHTML = `
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <img src="${skin.imgSrc}" onerror="this.style.opacity='0.2'">
+                    <div style="text-align:left;">
+                        <div style="color:white; font-size:16px; font-weight:bold;">${skin.name}</div>
+                        <div style="color:#32ff32; font-size:13px;">+${skin.hp - av.skins[0].hp} Vida ${extraWeaponsText}</div>
+                    </div>
+                </div>
+                ${btnHTML}
+            `;
+            skinsContainer.appendChild(div);
+        });
+    }
+}
+
+function equipSkin(brawlerId, skinId) {
+    selectedSkins[brawlerId] = skinId;
+    localStorage.setItem('selectedSkins', JSON.stringify(selectedSkins));
+    updateAvatarPreview();
+    openAvatarMenu();
+}
+
+function buySkin(brawlerId, skinId, costCopes, costXp) {
+    if (copes >= costCopes && xp >= costXp) {
+        copes -= costCopes;
+        xp -= costXp;
+        unlockedSkins[brawlerId].push(skinId);
+        localStorage.setItem('unlockedSkins', JSON.stringify(unlockedSkins));
+        updateUI();
+        equipSkin(brawlerId, skinId);
+        alert("Aspecte desbloquejat i equipat!");
+    } else {
+        alert("Et falten Copes o XP per adquirir aquest aspecte!");
+    }
+}
+
+function spinRoulette() {
+    let random = allBosses[Math.floor(Math.random() * allBosses.length)];
+    selectedBoss = random;
+    document.getElementById('roulette-display').innerText = random.projectile;
+    document.getElementById('boss-random-name').innerText = random.name;
+    
+    let spins = 0;
+    let maxSpins = 10;
+    let interval = setInterval(() => {
+        spins++;
+        let tempRandom = allBosses[Math.floor(Math.random() * allBosses.length)];
+        document.getElementById('roulette-display').innerText = tempRandom.projectile;
+        
+        if(spins >= maxSpins) {
+            clearInterval(interval);
+            document.getElementById('roulette-display').innerText = random.projectile;
+            setTimeout(() => {
+                startGame();
+            }, 1000);
+        }
+    }, 100);
+}
+
+// --- GESTIÓ DE RECOMPENSES I NIVELLS ---
+function openRewards() {
+    document.getElementById('menu-world').style.display = 'none';
+    document.getElementById('page-rewards').style.display = 'flex';
+    document.getElementById('back-from-rewards').style.display = 'block';
+}
+
+function startMission(minutes, targetCopes, rewardXP, durationSec) {
+    if(activeMission) { alert("Ja tens una missió activa!"); return; }
+    
+    activeMission = { target: targetCopes, xp: rewardXP, endTime: Date.now() + (minutes * 60000) };
+    missionProgressCopes = 0;
+    
+    document.getElementById('mission-tracker').style.display = 'block';
+    document.getElementById('page-rewards').style.display = 'none';
+    goHome();
+
+    missionInterval = setInterval(() => {
+        let timeLeft = activeMission.endTime - Date.now();
+        if(timeLeft <= 0) {
+            clearInterval(missionInterval);
+            alert("TEMPS ESGOTAT! Missió fallida.");
+            activeMission = null;
+            document.getElementById('mission-tracker').style.display = 'none';
+        } else {
+            let mins = Math.floor(timeLeft / 60000);
+            let secs = Math.floor((timeLeft % 60000) / 1000);
+            document.getElementById('track-time').innerText = `${mins}:${secs < 10 ? '0'+secs : secs}`;
+            document.getElementById('track-progress').innerText = `Guanyat: ${missionProgressCopes} / ${activeMission.target} 🏆`;
+            
+            if(missionProgressCopes >= activeMission.target) {
+                clearInterval(missionInterval);
+                alert("MISSIÓ COMPLETADA! +" + activeMission.xp + " XP");
+                xp += activeMission.xp;
+                activeMission = null;
+                document.getElementById('mission-tracker').style.display = 'none';
+                updateUI();
+            }
+        }
+    }, 1000);
+}
+
+function openLevels() {
+    document.getElementById('menu-world').style.display = 'none';
+    document.getElementById('page-levels').style.display = 'flex';
+    document.getElementById('back-from-levels').style.display = 'block';
+    
+    const container = document.getElementById('levels-container');
+    container.innerHTML = "";
+    
+    levelRewards.forEach(lvl => {
+        let isClaimed = claimedLevels.includes(lvl.id);
+        let canClaim = !isClaimed && copes >= lvl.copes;
+        let isLocked = copes < lvl.copes;
+        
+        let div = document.createElement('div');
+        div.className = `level-card ${!isLocked ? 'unlocked' : ''}`;
+        div.innerHTML = `
+            <div>
+                <strong style="color:${isLocked ? '#777' : '#fff'}">${lvl.text}</strong>
+                <div style="font-size:12px; color:#aaa;">Req: ${lvl.copes} 🏆</div>
+            </div>
+            <div style="text-align:right">
+                <div style="color:#ff00ff; font-weight:bold;">+${lvl.xp} XP</div>
+                <button class="claim-btn" ${canClaim ? '' : 'disabled'} onclick="claimLevel(${lvl.id}, ${lvl.xp})">
+                    ${isClaimed ? 'RECOLLIT' : (isLocked ? 'BLOQUEJAT' : 'RECOLLIR')}
+                </button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function claimLevel(id, rewardXP) {
+    if(claimedLevels.includes(id)) return;
+    xp += rewardXP;
+    claimedLevels.push(id);
+    localStorage.setItem('claimedLevels', JSON.stringify(claimedLevels));
+    updateUI();
+    openLevels();
+}
+
+// --- NAVEGACIÓ I PERFIL ---
+function goHome() {
+    gameRunning = false;
+    document.querySelectorAll('.menu').forEach(m => m.style.display = 'none');
+    document.getElementById('ui').style.display = 'none';
+    canvas.style.display = 'none';
+    document.getElementById('menu-world').style.display = 'flex';
+    document.getElementById('back-to-world').style.display = 'none';
+    document.getElementById('back-from-rewards').style.display = 'none';
+    document.getElementById('back-from-levels').style.display = 'none';
+    document.getElementById('back-from-profile').style.display = 'none';
+    updateUI();
+}
+
+function skipAnimation() {
+    document.getElementById('endgame-animation').style.display = 'none';
+    goHome();
+}
+
+function goBackToWorld() {
+    document.getElementById('menu-avatar').style.display = 'none';
+    document.getElementById('menu-world').style.display = 'flex';
+    document.getElementById('back-to-world').style.display = 'none';
+}
+
+function openProfile() {
+    document.getElementById('menu-world').style.display = 'none';
+    document.getElementById('menu-profile').style.display = 'flex';
+    document.getElementById('input-player-name').value = playerName;
+    
+    let currentSkinId = selectedSkins[curForm] || 0;
+    let av = avatars[curForm] || avatars[1];
+    let activeSkin = av.skins[currentSkinId];
+    
+    document.getElementById('profile-icon').innerHTML = `<img src="${activeSkin.imgSrc}" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">`;
+}
+
+function closeProfile() {
+    document.getElementById('menu-profile').style.display = 'none';
+    document.getElementById('menu-world').style.display = 'flex';
+}
+
+function saveName() {
+    let name = document.getElementById('input-player-name').value;
+    if(name.trim() !== "") {
+        playerName = name;
+        localStorage.setItem('playerName', playerName);
+        alert("Nom guardat correctament!");
+    }
+}
+
+function generateSaveCode() {
+    let saveObj = {
+        copes: copes,
+        xp: xp,
+        unlockedChars: unlockedChars,
+        unlockedSkins: unlockedSkins,
+        selectedSkins: selectedSkins,
+        claimedLevels: claimedLevels,
+        name: playerName
+    };
+    let json = JSON.stringify(saveObj);
+    let encoded = btoa(json);
+    document.getElementById('data-string').value = encoded;
+}
+
+function loadSaveCode() {
+    let encoded = document.getElementById('data-string').value;
+    if(!encoded) return;
+    try {
+        let json = atob(encoded);
+        let data = JSON.parse(json);
+        
+        if(data.copes !== undefined) {
+            localStorage.setItem('centes', data.copes);
+            localStorage.setItem('xp', data.xp || 0);
+            localStorage.setItem('unlockedChars', JSON.stringify(data.unlockedChars || [1]));
+            localStorage.setItem('unlockedSkins', JSON.stringify(data.unlockedSkins || {}));
+            localStorage.setItem('selectedSkins', JSON.stringify(data.selectedSkins || {}));
+            localStorage.setItem('claimedLevels', JSON.stringify(data.claimedLevels || []));
+            if(data.name) localStorage.setItem('playerName', data.name);
+            
+            alert("Dades carregades! La pàgina es recarregarà.");
+            location.reload();
+        }
+    } catch(e) {
+        alert("Codi invàlid o corrupte.");
+    }
+}
+
+// --- INPUTS I CONTROLS ---
+window.addEventListener('keydown', e => {
+    keys[e.key] = true;
+    const map = { '1':0, '2':6, '3':4, '4':5, '5':7, '6':1, '7':2, '8':3 };
+    if (map[e.key] !== undefined) {
+        let requestedWeapon = map[e.key];
+        let slot = document.getElementById('w' + requestedWeapon);
+        if (slot && slot.style.display !== 'none' && weapons[requestedWeapon].unlocked) {
+            document.getElementById('w' + curWeapon).classList.remove('active');
+            curWeapon = requestedWeapon;
+            slot.classList.add('active');
+            
+            let infoText = weapons[curWeapon].name;
+            if(weapons[curWeapon].desc) infoText += ": " + weapons[curWeapon].desc;
+            document.getElementById('weapon-info').innerText = infoText;
+        }
+    }
+    
+    // EVAPORAR AIGUA (PODER DEL SOL - TECLA X)
+    if (e.key.toLowerCase() === 'x' && gameRunning && boss) {
+        if (boss.hp <= boss.maxHp * 0.3) {
+            sunActiveUntil = Date.now() + 1000;
+            mapObjects = mapObjects.filter(obj => obj.type !== 'aigua');
+        }
+    }
+});
+
+window.addEventListener('keyup', e => keys[e.key] = false);
+
+window.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+});
+
+window.addEventListener('mousedown', () => isMouseDown = true);
+window.addEventListener('mouseup', () => isMouseDown = false);
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+
+// INICIALITZACIÓ
+updateUI();
+
+</script>
+</body>
+</html>
