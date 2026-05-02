@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brawl Morph: Unified Edition - Mega Update</title>
+    <style>
+        /* ==========================================================================
+           CONFIGURACIÓ BASE I VARIABLES DE DISSENY
+           ========================================================================== */
+        :root {
+            --primary-bg: #000;
+            --text-main: white;
+            --accent-pink: #ff00ff;
+            --accent-cyan: #00bcff;
+            --accent-gold: gold;
+            --accent-green: #32ff32;
+            --panel-bg: rgba(0, 0, 0, 0.8);
+        }
+
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background: var(--primary-bg); 
+            font-family: 'Arial Black', sans-serif; 
+            cursor: crosshair; 
+            color: var(--text-main); 
+            user-select: none; 
+        }
+        
+        canvas { 
+            display: none; 
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+        
+        /* ==========================================================================
+           ANIMACIONS GLOBALS
+           ========================================================================== */
+        @keyframes float { 
+            0% { transform: translateY(0px); } 
+            50% { transform: translateY(-10px); } 
+            100% { transform: translateY(0px); } 
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 10px var(--accent-cyan); }
+            50% { transform: scale(1.05); box-shadow: 0 0 25px var(--accent-cyan); }
+            100% { transform: scale(1); box-shadow: 0 0 10px var(--accent-cyan); }
+        }
+
+        /* ==========================================================================
+           BOTONS DE LA INTERFÍCIE I NAVEGACIÓ
+           ========================================================================== */
+        .nav-btn {
+            position: absolute; 
+            top: 20px; 
+            background: rgba(0, 0, 0, 0.7); 
+            color: white;
+            padding: 12px 24px; 
+            border-radius: 12px; 
+            border: 2px solid white;
+            z-index: 1100; 
+            cursor: pointer; 
+            display: none;
+            transition: 0.2s;
+        }
+        .nav-btn:hover { background: white; color: black; }
+
+        #back-to-world { left: 20px; }
+        #back-from-rewards, #back-from-levels, #back-from-profile, #back-from-shop, #back-from-codes { left: 20px; }
+
+        /* Botons Principals del Menú */
+        .menu-top-btn {
+            position: absolute; 
+            top: 20px;
+            color: white; 
+            padding: 12px 24px;
+            border-radius: 12px; 
+            border: 3px solid white; 
+            cursor: pointer; 
+            z-index: 1000;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .menu-top-btn:hover { transform: scale(1.1); }
+
+        #shop-btn { right: 280px; background: #ff4500; } 
+        #reward-btn { right: 470px; background: #ff00ff; }
+        #levels-btn { right: 660px; background: #00bcff; }
+        #codes-btn { right: 850px; background: #a855f7; } 
+
+        #centes-display {
+            position: absolute; 
+            top: 20px; 
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8); 
+            color: #00ffff;
+            padding: 15px 25px; 
+            border-radius: 15px; 
+            border: 3px solid #00ffff;
+            font-size: 20px; 
+            z-index: 1000; 
+            box-shadow: 0 0 15px rgba(0,255,255,0.5);
+        }
+
+        /* ==========================================================================
+           MENÚS (WORLD, REWARDS, LEVELS, PROFILE, SHOP, CODES)
+           ========================================================================== */
+        .menu { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            z-index: 100; 
+            justify-content: center; 
+        }
+        
+        #menu-world { background: radial-gradient(circle, #220022 0%, #000 100%); }
+        #page-rewards, #page-levels, #page-shop { background: radial-gradient(circle, #330033 0%, #000 100%); display: none; }
+        #menu-profile { background: radial-gradient(circle, #202020 0%, #000 100%); display: none; }
+        #page-codes { background: radial-gradient(circle, #2a004d 0%, #000 100%); display: none; }
+
+        .world-btn { 
+            padding: 30px 60px; 
+            font-size: 30px; 
+            margin: 20px; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            border: 5px solid white; 
+            color: white; 
+            text-transform: uppercase; 
+            background: #ff4500; 
+            box-shadow: 0 0 20px orange; 
+            transition: 0.3s;
+        }
+        .world-btn:hover { transform: scale(1.05); box-shadow: 0 0 40px orange; }
+
+        /* Estils específics de Nivells i Missions */
+        #page-levels { overflow-y: auto; padding-top: 100px; justify-content: flex-start !important; }
+        .alfombra { width: 80%; max-width: 600px; background: rgba(255, 255, 255, 0.05); border-radius: 50px; padding: 40px; display: flex; flex-direction: column; gap: 15px; border: 4px solid #333; margin-bottom: 50px; }
+        .level-card { background: #222; border-radius: 20px; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border: 2px solid #444; }
+        .level-card.unlocked { border-color: #00ff00; background: #1a2e1a; }
+        .claim-btn { background: #ffcc00; color: black; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .claim-btn:disabled { background: #555; cursor: not-allowed; }
+
+        /* ==========================================================================
+           NOVA BOTIGA D'ARMES
+           ========================================================================== */
+        #shop-grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 70vh;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .shop-item {
+            background: rgba(0,0,0,0.6);
+            border: 3px solid #555;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .shop-item:hover { border-color: var(--accent-cyan); transform: scale(1.03); }
+        .shop-item.purchased { border-color: var(--accent-green); opacity: 0.8; }
+        .shop-item-emoji { font-size: 60px; margin-bottom: 10px; }
+        .shop-item-title { color: var(--accent-gold); font-size: 22px; margin-bottom: 5px; }
+        .shop-item-desc { color: #ccc; font-size: 14px; margin-bottom: 15px; flex-grow: 1; }
+        .shop-item-stats { font-size: 12px; color: #aaa; margin-bottom: 15px; display: flex; justify-content: space-around;}
+        .buy-weapon-btn {
+            padding: 12px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;
+        }
+        .buy-weapon-btn.buyable { background: #ffcc00; color: black; }
+        .buy-weapon-btn.locked { background: #555; color: #888; cursor: not-allowed; }
+        .buy-weapon-btn.owned { background: #00ff00; color: black; cursor: default; }
+
+        /* ==========================================================================
+           INTERFÍCIE DEL JOC (IN-GAME UI)
+           ========================================================================== */
+        #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; z-index: 100; }
+        
+        .bar-container { position: absolute; width: 300px; height: 35px; background: rgba(0,0,0,0.7); border: 3px solid #fff; border-radius: 15px; overflow: hidden; box-shadow: 0 0 10px black;}
+        .bar-fill { height: 100%; width: 100%; transition: width 0.2s ease-out; }
+        
+        #player-ui { top: 60px; left: 20px; }
+        #boss-ui { top: 60px; right: 20px; }
+        .name-label { position: absolute; font-size: 22px; color: white; text-shadow: 2px 2px #000; font-weight: bold; }
+        
+        /* INVENTARI ARMES (DINÀMIC) */
+        .inventory-panel { 
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
+            display: flex; gap: 10px; pointer-events: auto; 
+            background: rgba(0,0,0,0.8); padding: 15px; border-radius: 25px; border: 2px solid #444;
+            flex-wrap: wrap; justify-content: center; max-width: 90%;
+        }
+        .slot { 
+            width: 60px; height: 60px; border: 3px solid #555; display: flex; align-items: center; justify-content: center; 
+            border-radius: 12px; background: rgba(0,0,0,0.7); font-size: 30px; opacity: 0.4; transition: 0.3s; position: relative;
+        }
+        .slot.unlocked { opacity: 1; border-color: #fff; cursor: pointer; }
+        .slot.active { border-color: #00ffff; box-shadow: 0 0 20px #00ffff; background: rgba(0,255,255,0.2); transform: scale(1.15); z-index: 10;}
+        .cooldown-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(255, 0, 0, 0.7); height: 0%; transition: height 0.1s linear; border-radius: 8px;}
+        .key-hint { position: absolute; top: -25px; color: #ffea00; font-size: 16px; font-weight: bold; text-shadow: 1px 1px black;}
+
+        /* AVATARS, MISSIONS I ROULETTE */
+        #avatar-grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; width: 100%; max-height: 65vh; overflow-y: auto; padding-right: 15px; }
+        .avatar-card { background: rgba(0,0,0,0.6); border: 3px solid #555; border-radius: 12px; cursor: pointer; padding: 15px 10px; text-align: center; transition: 0.2s; }
+        .avatar-card:hover { transform: scale(1.05); border-color: #aaa; }
+        .avatar-card.selected { border-color: #00ffff; box-shadow: 0 0 15px #00ffff; }
+        .avatar-card img { width: 90px; height: 90px; object-fit: contain; }
+        .skin-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; margin-bottom: 10px; }
+        .skin-row img { width: 50px; height: 50px; object-fit: contain; }
+        #roulette-display { font-size:120px; border:10px solid gold; border-radius:50%; width:180px; height:180px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); }
+        #mission-tracker { position: absolute; bottom: 120px; left: 20px; background: rgba(0,0,0,0.9); border: 2px solid #ff00ff; padding: 15px; border-radius: 10px; display: none; z-index: 1000; }
+        #weapon-info { position: absolute; top: 110px; left: 50%; transform: translateX(-50%); font-size: 20px; color: var(--accent-gold); text-shadow: 2px 2px black; font-weight: bold; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 10px;}
+        
+        #blindness-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); pointer-events: none; display: none; z-index: 50; transition: opacity 1s;}
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================================================
+         BOTONS DE NAVEGACIÓ SUPERIORS
+         ========================================================================== -->
+    <div id="back-to-world" class="nav-btn" onclick="goBackToWorld()">⬅️ ENRERE AL MENÚ</div>
+    <div id="back-from-rewards" class="nav-btn" onclick="goHome()">⬅️ INDEX</div>
+    <div id="back-from-levels" class="nav-btn" onclick="goHome()">⬅️ INDEX</div>
+    <div id="back-from-shop" class="nav-btn" onclick="goHome()">⬅️ INDEX</div>
+    <div id="back-from-codes" class="nav-btn" onclick="goHome()">⬅️ INDEX</div>
+    
+    <div id="codes-btn" class="menu-top-btn" onclick="openCodes()">⌨️ CODIS</div>
+    <div id="levels-btn" class="menu-top-btn" onclick="openLevels()">🏆 NIVELLS</div>
+    <div id="reward-btn" class="menu-top-btn" onclick="openRewards()">🎁 MISSIONS</div>
+    <div id="shop-btn" class="menu-top-btn" onclick="openShop()">🛒 COMPRAR ARMES</div>
+    
+    <div id="centes-display">
+        🏆 Copes: <span id="centes-count">0</span><br>
+        ⭐ XP: <span id="xp-count" style="color:#ff00ff">0</span>
+    </div>
+
+    <div id="mission-tracker">
+        <div style="color:#ff00ff; font-size:14px; font-weight: bold;">REPTE ACTIU:</div>
+        <div id="track-time" style="font-family: monospace; font-size: 22px;">00:00</div>
+        <div id="track-progress" style="color: #00ffff;">Guanyat: 0 / 0 🏆</div>
+    </div>
+
+    <!-- ==========================================================================
+         PÀGINA: CAMÍ DE NIVELLS
+         ========================================================================== -->
+    <div id="page-levels" class="menu">
+        <h1 style="color:#00bcff; margin-bottom: 20px; font-size: 40px;">CAMÍ DE RECOMPENSES</h1>
+        <div class="alfombra" id="levels-container"></div>
+    </div>
+
+    <!-- ==========================================================================
+         PÀGINA: BOTIGA D'ARMES
+         ========================================================================== -->
+    <div id="page-shop" class="menu">
+        <h1 style="color:#ff4500; margin-bottom: 10px; font-size: 50px; text-shadow: 0 0 20px orange;">L'ARMERIA</h1>
+        <p style="color: #ccc; margin-bottom: 30px; font-size: 18px;">Gasta la teva ⭐ XP per desbloquejar mecàniques devastadores.</p>
+        <div id="shop-grid-container"></div>
+    </div>
+
+    <!-- ==========================================================================
+         PÀGINA: SISTEMA DE CODIS
+         ========================================================================== -->
+    <div id="page-codes" class="menu">
+        <h1 style="color:#a855f7; margin-bottom: 20px; font-size: 50px; text-shadow: 0 0 20px #a855f7;">SISTEMA DE CODIS</h1>
+        <p style="color: #ccc; margin-bottom: 30px; font-size: 18px;">Introdueix un codi secret per obtenir recompenses exclusives.</p>
+        <div style="background:rgba(255,255,255,0.1); padding:40px; border-radius:20px; border:2px solid #a855f7; text-align:center; width: 400px; max-width:90%;">
+            <input type="text" id="input-code" placeholder="Escriu el codi aquí..." style="font-size:20px; padding:15px; width:80%; text-align:center; margin-top:10px; border-radius:10px; border:none; outline: none; font-family: monospace;">
+            <br><br>
+            <button onclick="redeemCode()" class="claim-btn" style="background:#a855f7; color:white; font-size:20px; padding:15px 30px; width: 80%;">CANVIAR CODI</button>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MENÚ PRINCIPAL (WORLD)
+         ========================================================================== -->
+    <div id="menu-world" class="menu">
+        <div id="profile-btn-world" onclick="openProfile()" style="position:absolute; top:20px; left:20px; background:rgba(0,0,0,0.6); border:2px solid white; padding:10px; border-radius:10px; cursor:pointer; font-size:24px; z-index:200; transition: 0.2s;">
+            👤 PERFIL
+        </div>
+
+        <h1 style="font-size:70px; margin-bottom: 20px; text-shadow: 0 0 30px #ff00ff;">BRAWL UNIVERSE</h1>
+        <div class="world-btn" onclick="openAvatarMenu()">⚔️ ENTRAR A LA BATALLA ⚔️</div>
+    </div>
+
+    <!-- ==========================================================================
+         MENÚ: GESTIÓ DE COMPTE / PERFIL
+         ========================================================================== -->
+    <div id="menu-profile" class="menu">
+        <div id="back-from-profile" class="nav-btn" onclick="closeProfile()" style="display:block; background:red;">⬅️ SORTIR</div>
+        <h1 style="color: gold; margin-bottom: 30px; font-size: 40px;">GESTIÓ DE COMPTE</h1>
+
+        <div style="background:rgba(255,255,255,0.1); padding:40px; border-radius:20px; border:2px solid #00bcff; text-align:center; width: 500px; max-width:90%;">
+            <div style="margin-bottom: 20px;">
+                <div id="profile-icon" style="font-size: 80px; background:rgba(0,0,0,0.5); width:120px; height:120px; margin:0 auto; border-radius:50%; display:flex; align-items:center; justify-content:center; border:4px solid white; overflow:hidden;"></div>
+                <p style="color:#aaa; font-size:12px;">(Icona del personatge actual)</p>
+            </div>
+
+            <label style="color:#00ffff; font-size:20px; font-weight: bold;">EL TEU NOM:</label><br>
+            <input type="text" id="input-player-name" placeholder="Escriu el teu nom..." maxlength="12" style="font-size:20px; padding:10px; width:60%; text-align:center; margin-top:10px; border-radius:10px; border:none; outline: none;">
+            <button onclick="saveName()" style="font-size:18px; padding:10px 20px; background:#00ff00; border:none; border-radius:10px; cursor:pointer; font-weight:bold; margin-top: 10px;">GUARDAR</button>
+            <br><br><hr style="border-color:#555;"><br>
+            
+            <h3 style="color:#ff00ff; margin-bottom: 15px;">TRANSFERIR DADES (ID SAVESTATE)</h3>
+            <textarea id="data-string" style="width:100%; height:80px; background:#222; color:#0f0; border:1px solid #555; font-family:monospace; font-size:12px; resize:none; padding: 10px; box-sizing: border-box;" readonly placeholder="Clica 'GENERAR ID' per veure el codi..."></textarea>
+            
+            <div style="display:flex; justify-content:space-between; margin-top:15px; gap:10px;">
+                <button onclick="generateSaveCode()" style="flex:1; padding:12px; background:#ffcc00; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size: 16px;">GENERAR ID</button>
+                <button onclick="loadSaveCode()" style="flex:1; padding:12px; background:#00bcff; border:none; border-radius:8px; cursor:pointer; font-weight:bold; font-size: 16px;">CARREGAR ID</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MENÚ: SELECCIÓ D'AVATARS I ASPECTES
+         ========================================================================== -->
+    <div id="menu-avatar" class="menu" style="display:none; flex-direction:row; align-items:flex-start; justify-content:center; padding-top:80px; width:95%; max-width:1500px; margin:0 auto; gap:30px;">
+        <div style="flex:1.5; padding:20px; border-right: 3px solid #00ffff; height: 80vh;">
+            <h2 style="color:gold; margin-top:0; font-size: 35px; text-shadow: 0 0 10px gold;">SELECCIÓ DE BRAWLER</h2>
+            <div id="avatar-grid-container"></div>
+        </div>
+        
+        <div style="flex:1; padding:30px 40px; display:flex; flex-direction:column; align-items:center; height: 80vh; overflow-y:auto; background: rgba(0, 255, 255, 0.05); border-radius: 20px; box-shadow: inset 0 0 20px rgba(0,255,255,0.1);">
+            <div id="avatar-preview" style="font-size: 100px; margin-bottom: 20px; height: 250px;"></div>
+            <h2 id="avatar-name" style="color: gold; margin-bottom: 5px; text-align:center; font-size: 38px;">NOM</h2>
+            <div id="avatar-desc" style="color: #ccc; font-size:18px; text-align:center; margin-bottom: 20px; font-style: italic;">Descripció</div>
+            
+            <div style="background:rgba(0,0,0,0.8); padding:20px; border-radius:15px; width:100%; text-align:center; margin-bottom:20px; border:2px solid #444;">
+                <div id="avatar-speed" style="color: #00ffff; font-size: 20px;">Velocitat Base: 0</div>
+                <div id="avatar-hp" style="color: #32ff32; font-weight:bold; font-size:24px; margin: 10px 0;">Vida Màxima Actual: 0</div>
+                <div id="avatar-weapons" style="font-size: 14px; color: gold;">Els teus projectils comprats formaran l'inventari.</div>
+            </div>
+            
+            <h3 style="color:#ff00ff; margin-bottom:15px; width:100%; text-align:left; font-size: 26px; border-bottom: 2px solid #ff00ff; padding-bottom: 5px;">ASPECTES (SKINS)</h3>
+            <div id="skins-container" style="width:100%; display:flex; flex-direction:column; gap:12px;"></div>
+            
+            <button id="action-btn" class="world-btn" style="font-size:24px; padding:20px; background: #00ff00; width:100%; margin-top:30px; border-radius: 15px;">ELEGIR BRAWLER</button>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MENÚ: MISSIONS
+         ========================================================================== -->
+    <div id="page-rewards" class="menu" style="display:none">
+        <h1 style="color:#ff00ff; font-size: 50px;">SALA DE MISSIONS</h1>
+        <div style="display:flex; gap:30px; margin-top: 30px;">
+            <div style="background:rgba(255,255,255,0.1); padding:30px; border-radius:20px; width:280px; text-align:center; border:3px solid white; box-shadow: 0 0 20px rgba(255,255,255,0.2);">
+                <h3 style="font-size: 28px; color: #00ff00;">FÀCIL</h3>
+                <p style="font-size: 18px;">Guanya 50🏆 en 8 min</p>
+                <p style="color:lime; font-size: 22px; font-weight: bold;">+25 XP</p>
+                <button class="claim-btn" style="width: 100%; margin-top: 15px; font-size: 18px;" onclick="startMission(8, 50, 25, 30)">ACCEPTAR REPTE</button>
+            </div>
+            <div style="background:rgba(255,255,255,0.1); padding:30px; border-radius:20px; width:280px; text-align:center; border:3px solid white; box-shadow: 0 0 20px rgba(255,255,255,0.2);">
+                <h3 style="font-size: 28px; color: #ffcc00;">DIFÍCIL</h3>
+                <p style="font-size: 18px;">Guanya 125🏆 en 20 min</p>
+                <p style="color:lime; font-size: 22px; font-weight: bold;">+75 XP</p>
+                <button class="claim-btn" style="width: 100%; margin-top: 15px; font-size: 18px;" onclick="startMission(20, 125, 75, 60)">ACCEPTAR REPTE</button>
+            </div>
+            <div style="background:rgba(255,255,255,0.1); padding:30px; border-radius:20px; width:280px; text-align:center; border:3px solid white; box-shadow: 0 0 20px rgba(255,255,255,0.2);">
+                <h3 style="font-size: 28px; color: #ff0000;">DÉU</h3>
+                <p style="font-size: 18px;">Guanya 200🏆 en 32 min</p>
+                <p style="color:lime; font-size: 22px; font-weight: bold;">+200 XP</p>
+                <button class="claim-btn" style="width: 100%; margin-top: 15px; font-size: 18px;" onclick="startMission(32, 200, 100, 90)">ACCEPTAR REPTE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MENÚ: RULETA DE BOSS
+         ========================================================================== -->
+    <div id="menu-boss" class="menu" style="display:none">
+        <h2 style="color: white; font-size: 30px; margin-bottom: 40px;">S'APROPA UN ENEMIC...</h2>
+        <div id="roulette-display">❓</div>
+        <div id="boss-random-name" style="font-size:40px; color:gold; margin-top:30px; text-shadow: 0 0 15px gold;">???</div>
+        <div id="spin-btn" class="world-btn" style="background: #ff00ff; border-color: #ff00ff; margin-top: 50px;" onclick="spinRoulette()">GIRAR LA RULETA</div>
+    </div>
+
+    <!-- ==========================================================================
+         UI DEL JOC I CANVAS PRINCIPAL
+         ========================================================================== -->
+    <div id="ui">
+        <div id="blindness-overlay"></div> <!-- Fosc quan s'usa la Lluna -->
+        
+        <div id="player-name-ui" class="name-label" style="top: 30px; left: 20px;">JUGADOR</div>
+        <div id="player-ui" class="bar-container"><div id="p-fill" class="bar-fill" style="background: linear-gradient(90deg, #00ff00, #32ff32);"></div></div>
+        
+        <div id="boss-name-ui" class="name-label" style="top: 30px; right: 20px; text-align: right;">BOSS ENEMY</div>
+        <div id="boss-ui" class="bar-container"><div id="b-fill" class="bar-fill" style="background: linear-gradient(90deg, #aa0000, #ff0000);"></div></div>
+        
+        <div id="weapon-info">Selecciona una arma</div>
+        <div id="weapons-ui" class="inventory-panel"></div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- ==========================================================================
+         PANTALLA DE FINAL DE PARTIDA (ANIMACIÓ)
+         ========================================================================== -->
+    <div id="endgame-animation" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; background: rgba(0,0,0,0.95); flex-direction: column; justify-content: center; align-items: center;">
+        <h1 id="endgame-title" style="font-size: 80px; text-shadow: 0 0 30px white; margin-bottom: 20px;">FI DE LA BATALLA</h1>
+        <p id="endgame-subtitle" style="font-size: 30px; color: gold; margin-bottom: 50px;">Calculant resultats...</p>
+        <button class="world-btn" onclick="skipAnimation()" style="background: #00bcff; border: 3px solid white; box-shadow: 0 0 20px #00bcff; font-size: 24px; padding: 15px 40px;">CONTINUAR</button>
+    </div>
+
+<script>
+/* ==========================================================================
+   SISTEMA DE DADES I ESTAT GLOBAL (LOCALSTORAGE)
+   ========================================================================== */
+let copes = parseInt(localStorage.getItem('centes')) || 0;
+let xp = parseFloat(localStorage.getItem('xp')) || 0;
+
+let unlockedChars = JSON.parse(localStorage.getItem('unlockedChars')) || [1];
+let unlockedSkins = JSON.parse(localStorage.getItem('unlockedSkins')) || {};
+let selectedSkins = JSON.parse(localStorage.getItem('selectedSkins')) || {};
+let purchasedWeapons = JSON.parse(localStorage.getItem('purchasedWeapons')) || [0];
+let claimedLevels = JSON.parse(localStorage.getItem('claimedLevels')) || [];
+let usedCodes = JSON.parse(localStorage.getItem('usedCodes')) || [];
+let playerName = localStorage.getItem('playerName') || "Jugador";
+
+/* ==========================================================================
+   CONSTANTS I VARIABLES GLOBALS DEL CANVAS I MOTOR
+   ========================================================================== */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let gameRunning = false, selectedBoss = null, mouseX = 0, mouseY = 0, isMouseDown = false;
+let player, boss, bullets, bossBullets, keys = {}, curWeapon = 0, curForm = 1, tempSelected = 1;
+
+let activeMission = null, missionProgressCopes = 0, missionInterval = null;
+let mapObjects = [], sunActiveUntil = 0, playerInTallGrass = false, specialEntities = [];
+
+/* ==========================================================================
+   SISTEMA D'ARMES (Estadístiques i Botiga)
+   ========================================================================== */
+const weapons = {
+    0: { emoji: "🔫", dmg: 20, speed: 15, rate: 400, costXp: 0, name: "Pistola Base", desc: "Tret directe ràpid i fiable." },
+    1: { emoji: "🔥", dmg: 12, speed: 20, rate: 100, costXp: 50, name: "Llançaflames", desc: "Ràfega de foc contínua." },
+    2: { emoji: "🚨", dmg: 150, speed: 0, rate: 1000, costXp: 60, name: "Mina", desc: "Trampa explosiva estàtica.", isMine: true },
+    3: { emoji: "💣", dmg: 100, speed: 10, rate: 800, costXp: 70, name: "Granada", desc: "Explosiu pesat." },
+    4: { emoji: "🥊", dmg: 0, speed: 12, rate: 20000, costXp: 80, name: "Puny Especial", desc: "Stun massiu en impacte.", type: 'punch' },
+    6: { emoji: "🐔", dmg: 40, speed: 15, rate: 300, costXp: 100, name: "Gallina Metralleta", desc: "Dispara gallines amb gran ràtio." },
+    7: { emoji: "🐱", dmg: 0, speed: 20, rate: 25000, costXp: 90, name: "Gat Rebotador", desc: "Rebota per la sala, treu 20% vida boss.", type: 'cat' },
+    
+    5: { emoji: "👒", dmg: 150, speed: 15, rate: 3000, costXp: 80, name: "Sombrero de paja", desc: "Projectil amb trajectòria corba màgica.", type: 'special_sombrero' },
+    8: { emoji: "🗡️", dmg: 80, speed: 30, rate: 1000, costXp: 120, name: "Katana", desc: "Tall ràpid que sagna el boss.", type: 'special_katana' },
+    9: { emoji: "🪇", dmg: 60, speed: 12, rate: 1500, costXp: 100, name: "Malabares", desc: "Viatja fent ones sinusoïdals.", type: 'special_malabares' },
+    10: { emoji: "✨", dmg: 200, speed: 20, rate: 4000, costXp: 150, name: "Estrella fugaz", desc: "Cau en diagonal directe cap al boss.", type: 'special_estrella' },
+    11: { emoji: "🦧", dmg: 50, speed: 0, rate: 8000, costXp: 300, name: "Gorilla Squad", desc: "Invoca arbre que crida 3 goril·les homing.", type: 'special_gorilla_summon' },
+    12: { emoji: "👣", dmg: 25, speed: 0, rate: 15000, costXp: 180, name: "Pies / Petjades", desc: "Deixes petjades tòxiques durant 10 segons.", type: 'special_pies_buff' },
+    13: { emoji: "🪦", dmg: 70, speed: 0, rate: 10000, costXp: 250, name: "Tumbas Zombi", desc: "Invoca 3 tombes que alliberen zombis perseguidors.", type: 'special_tumbas' },
+    14: { emoji: "🥾", dmg: 300, speed: 0, rate: 6000, costXp: 220, name: "Te Piso!", desc: "Sabata gegant esclafa el boss des del cel.", type: 'special_zapato' },
+    15: { emoji: "🕹️", dmg: 350, speed: 0, rate: 7000, costXp: 280, name: "Maquina de ganxo", desc: "Atrapa el boss, l'stuneja 1s i l'esclafa.", type: 'special_gancho' },
+    16: { emoji: "🎶", dmg: 50, speed: 0, rate: 5000, costXp: 150, name: "Notes Musicals", desc: "Dispara 3 notes de lent seguiment.", type: 'special_notas' },
+    17: { emoji: "🧲", dmg: 0, speed: 0, rate: 20000, costXp: 400, name: "Imant", desc: "Paralitza el boss immòbil durant 10 segons.", type: 'special_iman' },
+    18: { emoji: "🛼", dmg: 120, speed: 25, rate: 3000, costXp: 110, name: "Patines", desc: "Projectil extremadament veloç.", type: 'special_patines' },
+    19: { emoji: "✈️", dmg: 400, speed: 18, rate: 9000, costXp: 500, name: "Avion Bombarder", desc: "Cau i crea gran explosió. Neteja bales.", type: 'special_avion' },
+    20: { emoji: "🌚", dmg: 0, speed: 0, rate: 25000, costXp: 600, name: "Lluna Cega", desc: "Cega la pantalla 15s. El boss no ataca.", type: 'special_luna' },
+};
+
+const lastFired = {}; 
+for(let key in weapons) lastFired[key] = 0;
+
+const HOTKEYS = ['1','2','3','4','5','6','7','8','9','0','Q','W','E','R','T','Y','U','I','O','P','A','S','D','F'];
+let activeKeyMap = {}; 
+
+/* ==========================================================================
+   RESTAURACIÓ DELS 18 AVATARS ORIGINALS + INCORPORACIÓ DE LA "ID 2"
+   ========================================================================== */
+const avatars = {
+    1: { name: "FerranTrufa", speed: 4, cost: 0, desc: "Rei dels gossos",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skinferrantrufa.png", hp: 100, costCopes: 0, costXp: 0 },
+             { id: 1, name: "Nada", imgSrc: "skinferrantrufa_pro.png", hp: 150, costCopes: 100, costXp: 20 },
+             { id: 2, name: "Déu Suprem", imgSrc: "skinferrantrufa_pro.png", hp: 200, costCopes: 300, costXp: 50 }
+         ] },
+    2: { name: "Trufa", speed: 6, cost: 10, desc: "Equilibrat.",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skintrufa.png", hp: 100, costCopes: 0, costXp: 0 },
+             { id: 1, name: "Mariachi", imgSrc: "trufamexico.png", hp: 130, costCopes: 150, costXp: 30 },
+             { id: 2, name: "Déu Suprem", imgSrc: "trufamexico.png", hp: 180, costCopes: 400, costXp: 60 }
+         ] },
+    3: { name: "ProGodo", speed: 6, cost: 20, desc: "Domina corrents.",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skingodo.png", hp: 110, costCopes: 0, costXp: 0 },
+             { id: 1, name: "Nada", imgSrc: "skingodo_pro.png", hp: 160, costCopes: 200, costXp: 40 },
+             { id: 2, name: "Déu Suprem", imgSrc: "skingodo_pro.png", hp: 220, costCopes: 500, costXp: 80 }
+         ] },
+    4: { name: "ElPepe", speed: 8, cost: 30, desc: "Molt àgil.",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skinelpepe.png", hp: 90, costCopes: 0, costXp: 0 },
+             { id: 1, name: "Elpepedios", imgSrc: "elpepedios.png", hp: 140, costCopes: 250, costXp: 50 },
+             { id: 2, name: "Déu Suprem", imgSrc: "elpepedios.png", hp: 200, costCopes: 600, costXp: 100 }
+         ] },
+    5: { name: "Sers25", speed: 8, cost: 35, desc: "Tanc dels dragons",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skinsers.png", hp: 150, costCopes: 0, costXp: 0 },
+             { id: 1, name: "Sers meca", imgSrc: "Skin Sersmeca.png", hp: 220, costCopes: 300, costXp: 60 },
+             { id: 2, name: "Déu Suprem", imgSrc: "Skin Sersmeca.png", hp: 300, costCopes: 700, costXp: 150 }
+         ] },
+    6: { name: "Ferran", speed: 7, cost: 40, desc: "Explorador marí.",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skinferran.png", hp: 100, costCopes: 0, costXp: 0 },
+             { id: 1, name: "Mariachi", imgSrc: "ferranmexico.png", hp: 150, costCopes: 350, costXp: 70 },
+             { id: 2, name: "Déu Suprem", imgSrc: "ferranmexico.png", hp: 210, costCopes: 800, costXp: 160 }
+         ] },
+    7: { name: "Hablack09", speed: 9, cost: 50, desc: "Depredador alfa.",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skinmarc.png", hp: 120, costCopes: 0, costXp: 0 },
+             { id: 1, name: "Hablack Omega", imgSrc: "Skin Hablackmeca.png", hp: 180, costCopes: 400, costXp: 80 },
+             { id: 2, name: "Vtuber", imgSrc: "Skin Hablackvtuber.png", hp: 250, costCopes: 900, costXp: 200 }
+         ] },
+    8: { name: "BlackGoku", speed: 11, cost: 55, desc: "El taekwondo fa volar.",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "blackgoku.png", hp: 110, costCopes: 0, costXp: 0 },
+             { id: 1, name: "goku4", imgSrc: "goku4.webp", hp: 170, costCopes: 450, costXp: 90 },
+             { id: 2, name: "Déu Suprem", imgSrc: "goku4.webp", hp: 240, costCopes: 1000, costXp: 250 }
+         ] },
+    9: { name: "AyuMeReck", speed: 10, cost: 60, desc: "Velocitat alta.",
+         skins: [
+             { id: 0, name: "Bàsic", imgSrc: "skinayu.png", hp: 100, costCopes: 0, costXp: 0 },
+             { id: 1, name: "Reck Suprem", imgSrc: "skinayu_pro.png", hp: 160, costCopes: 500, costXp: 100 },
+             { id: 2, name: "Déu Suprem", imgSrc: "skinayu_pro.png", hp: 230, costCopes: 1200, costXp: 300 }
+         ] },
+    10: { name: "Tomatina", speed: 10, cost: 70, desc: "Explosiva! Bonus x1.2", multiplier: 1.2,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "skintomatina.png", hp: 120, costCopes: 0, costXp: 0 },
+              { id: 1, name: "Mariachi", imgSrc: "tomatinamexico.png", hp: 180, costCopes: 600, costXp: 120 },
+              { id: 2, name: "Déu Suprem", imgSrc: "tomatinamexico.png", hp: 260, costCopes: 1500, costXp: 400 }
+          ] },
+    11: { name: "Adredvv", speed: 17, cost: 500, desc: "LLEGENDARI: Bonus x1.3", multiplier: 1.3,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "skinadria.png", hp: 200, costCopes: 0, costXp: 0 },
+              { id: 1, name: "Adribinary", imgSrc: "adribinary.png", hp: 300, costCopes: 1500, costXp: 300 },
+              { id: 2, name: "Déu Suprem", imgSrc: "adribinary.png", hp: 450, costCopes: 3000, costXp: 800 }
+          ] },
+    12: { name: "AVAP", speed: 16, cost: 750, desc: "Rei del Mar. Bonus x1.5", multiplier: 1.5,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "skinavap.png", hp: 220, costCopes: 0, costXp: 0 },
+              { id: 1, name: "AVAP de les Foses", imgSrc: "skinavap_pro.png", hp: 320, costCopes: 2000, costXp: 400 },
+              { id: 2, name: "Déu Suprem", imgSrc: "skinavap_pro.png", hp: 500, costCopes: 4000, costXp: 1000 }
+          ] },
+    13: { name: "Structito", speed: 15, cost: 1000, desc: "LLEGENDARI: Guanya x2 Copes!", multiplier: 2,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "skinstructito.png", hp: 250, costCopes: 0, costXp: 0 },
+              { id: 1, name: "Structito Ninja", imgSrc: "skinstructitoninja.png", hp: 400, costCopes: 3000, costXp: 600 },
+              { id: 2, name: "Déu Suprem", imgSrc: "skinstructitoninja.png", hp: 600, costCopes: 6000, costXp: 1500 }
+          ] },
+    14: { name: "GatoPitufo", speed: 17, cost: 1500, desc: "Els gats de 2023 son x3", multiplier: 3,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "gatopitufo.png", hp: 150, costCopes: 0, costXp: 0 },
+              { id: 1, name: "Gat Màgic", imgSrc: "gatopitufo_pro.png", hp: 250, costCopes: 4500, costXp: 800 },
+              { id: 2, name: "Déu Suprem", imgSrc: "gatopitufo_pro.png", hp: 400, costCopes: 8000, costXp: 2000 }
+          ] },
+    15: { name: "Chipi Chipi", speed: 20, cost: 2000, desc: "Chipi chipi chapa chapa x3.5", multiplier: 3.5,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "chipichipi.png", hp: 200, costCopes: 0, costXp: 0 },
+              { id: 1, name: "Mariachi", imgSrc: "chipimexico.png", hp: 350, costCopes: 6000, costXp: 1000 },
+              { id: 2, name: "Déu Suprem", imgSrc: "chipimexico.png", hp: 550, costCopes: 10000, costXp: 3000 }
+          ] },
+    16: { name: "Catbanana", speed: 12, cost: 1500, desc: "bana bana bana", multiplier: 2.3,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "catbanana.png", hp: 200, costCopes: 0, costXp: 0 },
+              { id: 1, name: "Nada", imgSrc: "chipichipi_pro.png", hp: 350, costCopes: 6000, costXp: 1000 },
+              { id: 2, name: "Déu Suprem", imgSrc: "chipichipi_pro.png", hp: 500, costCopes: 9000, costXp: 2500 }
+          ] },  
+    17: { name: "Luffy", speed: 12, cost: 1500, desc: "bana bana bana", multiplier: 2.3,
+          skins: [
+              { id: 0, name: "Bàsic", imgSrc: "luffy.webp", hp: 400, costCopes: 0, costXp: 0 },
+              { id: 1, name: "Nada", imgSrc: "chipichipi_pro.png", hp: 550, costCopes: 6000, costXp: 1000 },
+              { id: 2, name: "Déu Suprem", imgSrc: "chipichipi_pro.png", hp: 800, costCopes: 12000, costXp: 4000 }
+          ] }
+};
+
+// Inicialització de seguretat
+unlockedChars.forEach(charId => {
+    if (!unlockedSkins[charId]) unlockedSkins[charId] = [0];
+    if (selectedSkins[charId] === undefined) selectedSkins[charId] = 0;
+});
+
+/* ==========================================================================
+   RESTAURACIÓ DELS BOSSES ORIGINALS
+   ========================================================================== */
+const allBosses = [
+    { name: "Como Ta Muchacho", imgSrc: "skincomotamuchacho.webp", projectile: "🎱", cd: 2500, dmg: 30, speed: 2, size: 130 },
+    { name: "Skibidi Toilet", imgSrc: "skinskiiditoilet.webp", projectile: "💩", cd: 800, dmg: 25, speed: 2, size: 130 },
+    { name: "Sumikata", imgSrc: "skinsumikata.png", projectile: "⚠️", cd: 2500, dmg: 30, speed: 2, size: 130 },
+    { name: "Demogorgon", imgSrc: "skindemogorgon.png", projectile: "🩸", cd: 2200, dmg: 20, speed: 2, size: 140 },
+    { name: "Pou", imgSrc: "skinpou.png", projectile: "💩", cd: 2200, dmg: 20, speed: 2, size: 130 },
+    { name: "Pocoyo.exe", imgSrc: "skinpocoyo.png", projectile: "🛒", cd: 2200, dmg: 20, speed: 2, size: 120 },
+    { name: "Papaleta dame paleta", imgSrc: "papaleta.webp", projectile: "🍭", cd: 2200, dmg: 20, speed: 1, size: 130 },
+    { name: "Demoniosumo", imgSrc: "demoniosumo.png", projectile: "🍙", cd: 2200, dmg: 20, speed: 2, size: 130 },
+    { name: "Troll", imgSrc: "skintroll.png", projectile: "🤡", cd: 2200, dmg: 20, speed: 2, size: 130 },
+    { name: "Pomni", imgSrc: "pomni.png", projectile: "🪇", cd: 2200, dmg: 20, speed: 2.5, size: 120 }
+];
+
+// Pre-càrrega d'imatges
+for (let id in avatars) {
+    avatars[id].skins.forEach(skin => { skin.imgObj = new Image(); skin.imgObj.src = skin.imgSrc; });
+}
+for (let boss of allBosses) {
+    boss.imgObj = new Image(); boss.imgObj.src = boss.imgSrc;
+}
+
+const levelRewards = [];
+for (let i = 1; i <= 50; i++) {
+    let copesReq = i === 1 ? 50 : 100 + ((i - 2) * 100);
+    let xpRew = i === 1 ? 10 : parseFloat(((levelRewards[i-2]?.xp || 10) * 1.5).toFixed(1));
+    levelRewards.push({ id: i, copes: copesReq, xp: xpRew, text: `Nivell ${i}` });
+}
+
+/* ==========================================================================
+   FUNCIONS DE LA INTERFÍCIE (ACTUALITZAR UI, MISSATGES, GUARDAR)
+   ========================================================================== */
+function updateUI() {
+    localStorage.setItem('centes', copes);
+    localStorage.setItem('xp', xp);
+    document.getElementById('centes-count').innerText = Math.floor(copes);
+    document.getElementById('xp-count').innerText = Math.floor(xp);
+}
+
+function showFloatingMessage(text, color = "gold", emoji = "✨") {
+    const div = document.createElement("div");
+    div.innerHTML = `${emoji} ${text}`;
+    div.style.position = "absolute";
+    div.style.top = "30%";
+    div.style.left = "50%";
+    div.style.transform = "translate(-50%, -50%)";
+    div.style.padding = "20px 40px";
+    div.style.background = "rgba(0,0,0,0.9)";
+    div.style.border = `4px solid ${color}`;
+    div.style.color = color;
+    div.style.fontSize = "28px";
+    div.style.borderRadius = "20px";
+    div.style.zIndex = 2000;
+    div.style.pointerEvents = "none";
+    div.style.textAlign = "center";
+    div.style.boxShadow = `0 0 30px ${color}`;
+    document.body.appendChild(div);
+    
+    div.animate([ {opacity: 1, top: '30%'}, {opacity: 0, top: '20%'} ], { duration: 2500, easing: 'ease-in' });
+    setTimeout(() => div.remove(), 2400);
+}
+
+/* ==========================================================================
+   GENERADOR DE MAPES DINÀMICS
+   ========================================================================== */
+function generateMapObjects() {
+    mapObjects = [];
+    let safeDist = 200; 
+    
+    const addObj = (type, count, minW, maxW, minH, maxH) => {
+        for(let i=0; i < count; i++) {
+            let w = minW + Math.random()*(maxW-minW);
+            let h = (type === 'bloc' || type === 'hacker') ? w : minH + Math.random()*(maxH-minH); 
+            let x, y, valid = false, tries = 0;
+            do {
+                x = Math.random() * (canvas.width - w);
+                y = Math.random() * (canvas.height - h);
+                let newObj = {x, y, w, h};
+                let spawnSafe = (Math.hypot(x + w/2 - 200, y + h/2 - canvas.height/2) > safeDist) && 
+                                (Math.hypot(x + w/2 - (canvas.width-200), y + h/2 - canvas.height/2) > safeDist);
+                let overlap = false;
+                for (let existing of mapObjects) {
+                    if (!(existing.x > newObj.x + newObj.w || existing.x + existing.w < newObj.x || existing.y > newObj.y + newObj.h || existing.y + existing.h < newObj.y)) {
+                        overlap = true; break;
+                    }
+                }
+                valid = spawnSafe && !overlap;
+                tries++;
+            } while(!valid && tries < 500);
+            
+            if (valid) mapObjects.push({type, x, y, w, h, bloodDrops: []});
+        }
+    };
+    
+    addObj('bloc', 4, 80, 120, 80, 120); 
+    addObj('hacker', 3, 80, 120, 80, 120); 
+    addObj('aigua', 4, 120, 250, 120, 250); 
+    addObj('herba', 5, 150, 300, 150, 300); 
+}
+
+function rectCircleIntersect(rect, cx, cy, cr) {
+    let testX = Math.max(rect.x, Math.min(cx, rect.x + rect.w));
+    let testY = Math.max(rect.y, Math.min(cy, rect.y + rect.h));
+    return Math.hypot(cx - testX, cy - testY) < cr;
+}
+
+function checkSolid(px, py, r, typesToCheck) {
+    for (let obj of mapObjects) {
+        if (typesToCheck.includes(obj.type)) {
+            if (rectCircleIntersect(obj, px, py, r)) return true;
+        }
+    }
+    return false;
+}
+
+/* ==========================================================================
+   INTERFÍCIE DINÀMICA: INVENTARI IN-GAME
+   ========================================================================== */
+function generateInventoryUI() {
+    const container = document.getElementById('weapons-ui');
+    container.innerHTML = "";
+    activeKeyMap = {};
+    
+    let availableWeapons = purchasedWeapons.filter(id => weapons[id] !== undefined);
+    
+    availableWeapons.forEach((wId, index) => {
+        let w = weapons[wId];
+        let key = HOTKEYS[index] || '?';
+        activeKeyMap[key.toLowerCase()] = wId;
+        
+        let slot = document.createElement('div');
+        slot.id = 'w' + wId;
+        slot.className = 'slot unlocked' + (wId == curWeapon ? ' active' : '');
+        slot.innerHTML = `<span class="key-hint">${key}</span>${w.emoji}<div class="cooldown-overlay" id="cd-${wId}"></div>`;
+        slot.onclick = () => { selectWeapon(wId); };
+        container.appendChild(slot);
+    });
+    
+    selectWeapon(curWeapon);
+}
+
+function selectWeapon(wId) {
+    if (!purchasedWeapons.includes(parseInt(wId))) return;
+    
+    document.querySelectorAll('.slot').forEach(s => s.classList.remove('active'));
+    let activeSlot = document.getElementById('w' + wId);
+    if(activeSlot) activeSlot.classList.add('active');
+    
+    curWeapon = parseInt(wId);
+    let info = weapons[wId].name;
+    if(weapons[wId].desc) info += " | " + weapons[wId].desc;
+    document.getElementById('weapon-info').innerText = info;
+}
+
+/* ==========================================================================
+   GAME LOOP PRINCIPAL (LÒGICA I DIBUIX)
+   ========================================================================== */
+function startGame() {
+    document.querySelectorAll('.menu').forEach(m => m.style.display = 'none');
+    document.getElementById('ui').style.display = 'block';
+    canvas.style.display = 'block'; 
+    canvas.width = window.innerWidth; 
+    canvas.height = window.innerHeight;
+    
+    document.getElementById('player-name-ui').innerText = playerName;
+    document.getElementById('boss-name-ui').innerText = selectedBoss.name;
+
+    let currentSkinId = selectedSkins[curForm] || 0;
+    let activeSkin = avatars[curForm].skins[currentSkinId];
+
+    player = { x: 200, y: canvas.height/2, hp: activeSkin.hp, maxHp: activeSkin.hp, paralyzedUntil: 0, footprintBuffUntil: 0, lastFootprint: 0 };
+    boss = { x: canvas.width-200, y: canvas.height/2, hp: 2500, maxHp: 2500, lastAttack: 0, isStunned: false, stunUntil: 0, magnetStunUntil: 0, lunaBlindUntil: 0, wanderAngle: null };
+    
+    bullets = []; bossBullets = []; specialEntities = []; 
+    curWeapon = 0; 
+    for(let k in lastFired) lastFired[k] = 0;
+    sunActiveUntil = 0;
+    
+    generateMapObjects(); 
+    generateInventoryUI(); 
+    
+    gameRunning = true; 
+    requestAnimationFrame(draw);
+}
+
+function draw() {
+    if (!gameRunning) return;
+    const now = Date.now();
+    
+    ctx.fillStyle = "#0d0d15"; 
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    ctx.lineWidth = 1;
+    for(let i=0; i<canvas.width; i+=60) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
+    for(let i=0; i<canvas.height; i+=60) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); ctx.stroke(); }
+    
+    let isGrassTall = (now % 6000) < 5000;
+    playerInTallGrass = false;
+    
+    for (let obj of mapObjects) {
+        if (obj.type === 'aigua') {
+            ctx.fillStyle = 'rgba(0, 150, 255, 0.4)';
+            ctx.beginPath(); ctx.roundRect(obj.x, obj.y, obj.w, obj.h, 30); ctx.fill();
+        } else if (obj.type === 'herba') {
+            ctx.fillStyle = isGrassTall ? 'rgba(34, 139, 34, 0.8)' : 'rgba(144, 238, 144, 0.4)';
+            ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+            ctx.strokeStyle = isGrassTall ? '#004d00' : '#3cb371';
+            ctx.lineWidth = 2;
+            for(let i=0; i<obj.w/25; i++) {
+                ctx.beginPath(); ctx.moveTo(obj.x + 10 + i*25, obj.y + 10); ctx.lineTo(obj.x + 5 + i*25, obj.y + obj.h - 10); ctx.stroke();
+            }
+            if(obj.bloodDrops && obj.bloodDrops.length > 0) {
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+                for(let drop of obj.bloodDrops) { ctx.beginPath(); ctx.arc(drop.x, drop.y, 4, 0, Math.PI*2); ctx.fill(); }
+            }
+        } else if (obj.type === 'bloc') {
+            ctx.fillStyle = '#444'; ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+            ctx.strokeStyle = '#222'; ctx.lineWidth = 4; ctx.strokeRect(obj.x, obj.y, obj.w, obj.h);
+        } else if (obj.type === 'hacker') {
+            ctx.fillStyle = '#000'; ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+            ctx.strokeStyle = '#0f0'; ctx.lineWidth = 3; ctx.strokeRect(obj.x, obj.y, obj.w, obj.h);
+            ctx.fillStyle = '#0f0'; ctx.font = "bold 20px monospace"; ctx.textAlign = "center";
+            ctx.fillText("< />", obj.x + obj.w/2, obj.y + obj.h/2);
+        }
+    }
+
+    if (sunActiveUntil && now < sunActiveUntil) {
+        ctx.fillStyle = 'rgba(255, 255, 0, 0.4)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white'; ctx.font = "bold 60px Arial"; ctx.textAlign = "center";
+        ctx.fillText("☀️ EVAPORACIÓ!", canvas.width/2, canvas.height/4);
+    }
+    
+    const speed = avatars[curForm].speed;
+    if (player.paralyzedUntil && now < player.paralyzedUntil) {
+        ctx.fillStyle = 'yellow'; ctx.font = "bold 20px Arial"; ctx.textAlign = "center";
+        ctx.fillText("⚡PARALITZAT⚡", player.x, player.y - 60);
+    } else {
+        let dx = 0, dy = 0;
+        if (keys['w']) dy -= 1; if (keys['s']) dy += 1;
+        if (keys['a']) dx -= 1; if (keys['d']) dx += 1;
+        if (dx !== 0 || dy !== 0) { 
+            let mag = Math.sqrt(dx*dx+dy*dy); 
+            let moveX = (dx/mag)*speed; let moveY = (dy/mag)*speed;
+            if (!checkSolid(player.x + moveX, player.y, 30, ['bloc', 'hacker'])) player.x += moveX;
+            if (!checkSolid(player.x, player.y + moveY, 30, ['bloc', 'hacker'])) player.y += moveY;
+            player.x = Math.max(20, Math.min(canvas.width-20, player.x)); 
+            player.y = Math.max(20, Math.min(canvas.height-20, player.y));
+        }
+
+        for (let obj of mapObjects) {
+            if (obj.type === 'aigua' && rectCircleIntersect(obj, player.x, player.y, 30)) {
+                if (!player.paralyzedUntil || now > player.paralyzedUntil + 1000) player.paralyzedUntil = now + 4000;
+            } else if (obj.type === 'herba' && isGrassTall && rectCircleIntersect(obj, player.x, player.y, 30)) {
+                playerInTallGrass = true;
+            }
+        }
+    }
+
+    if (now < player.footprintBuffUntil) {
+        if (now - player.lastFootprint > 500) {
+            specialEntities.push({ type: 'footprint', x: player.x, y: player.y, creationTime: now });
+            player.lastFootprint = now;
+        }
+    }
+    
+    let bossIsImmobile = (boss.isStunned && now < boss.stunUntil) || (now < boss.magnetStunUntil);
+    let bossIsBlind = (now < boss.lunaBlindUntil);
+
+    const blindOverlay = document.getElementById('blindness-overlay');
+    if (bossIsBlind) { blindOverlay.style.display = 'block'; blindOverlay.style.opacity = '0.7'; } 
+    else { blindOverlay.style.opacity = '0'; setTimeout(() => { if(!bossIsBlind) blindOverlay.style.display = 'none'; }, 1000); }
+
+    if (!bossIsImmobile) {
+        let angleToPlayer;
+        if (playerInTallGrass || bossIsBlind) {
+            if (boss.wanderAngle === null || Math.random() < 0.05) boss.wanderAngle = Math.random() * Math.PI * 2;
+            angleToPlayer = boss.wanderAngle;
+        } else {
+            boss.wanderAngle = null; angleToPlayer = Math.atan2(player.y-boss.y, player.x-boss.x);
+        }
+        
+        let bx = boss.x + Math.cos(angleToPlayer) * selectedBoss.speed; 
+        let by = boss.y + Math.sin(angleToPlayer) * selectedBoss.speed;
+        if (!checkSolid(bx, boss.y, 60, ['hacker'])) boss.x = bx; 
+        if (!checkSolid(boss.x, by, 60, ['hacker'])) boss.y = by;
+        boss.x = Math.max(60, Math.min(canvas.width-60, boss.x)); boss.y = Math.max(60, Math.min(canvas.height-60, boss.y));
+        
+        if (!bossIsBlind && !playerInTallGrass && now - boss.lastAttack > selectedBoss.cd) {
+            bossBullets.push({ x: boss.x, y: boss.y, vx: Math.cos(angleToPlayer)*8, vy: Math.sin(angleToPlayer)*8, emoji: selectedBoss.projectile });
+            boss.lastAttack = now;
+        }
+    }
+    
+    let currentSkinId = selectedSkins[curForm] || 0;
+    let activeSkin = avatars[curForm].skins[currentSkinId];
+    
+    if (activeSkin.imgObj && activeSkin.imgObj.complete && activeSkin.imgObj.naturalWidth !== 0) {
+        ctx.save();
+        if (mouseX < player.x) { ctx.translate(player.x + 40, player.y - 40); ctx.scale(-1, 1); ctx.drawImage(activeSkin.imgObj, 0, 0, 80, 80); } 
+        else { ctx.drawImage(activeSkin.imgObj, player.x - 40, player.y - 40, 80, 80); }
+        ctx.restore();
+    } else {
+        ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(player.x, player.y, 30, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = "#000"; ctx.font = "bold 24px Arial"; ctx.textAlign = "center"; ctx.fillText("P", player.x, player.y+8);
+    }
+    
+    if(now < boss.magnetStunUntil) {
+        ctx.font = "40px Arial"; ctx.fillText("🧲", boss.x - 70, boss.y); ctx.fillText("🧲", boss.x + 70, boss.y);
+        ctx.strokeStyle = "cyan"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(boss.x-50, boss.y); ctx.lineTo(boss.x+50, boss.y); ctx.stroke();
+    } else if (now < boss.stunUntil) {
+        ctx.strokeStyle = "yellow"; ctx.lineWidth = 5; ctx.strokeRect(boss.x - 60, boss.y - 60, 120, 120);
+    }
+    
+    if (selectedBoss.imgObj && selectedBoss.imgObj.complete && selectedBoss.imgObj.naturalWidth !== 0) {
+        let size = selectedBoss.size || 130;
+        ctx.drawImage(selectedBoss.imgObj, boss.x - size / 2, boss.y - size / 2, size, size);
+    } else {
+        ctx.fillStyle = "red"; ctx.fillRect(boss.x - 50, boss.y - 50, 100, 100);
+        ctx.fillStyle = "white"; ctx.font = "bold 20px Arial"; ctx.fillText("BOSS", boss.x, boss.y);
+    }
+
+    if (isMouseDown && (!player.paralyzedUntil || now >= player.paralyzedUntil)) {
+        let w = weapons[curWeapon];
+        let lastF = lastFired[curWeapon] || 0;
+        if (now - lastF > w.rate) {
+            let angle = Math.atan2(mouseY-player.y, mouseX-player.x);
+            if(w.type && w.type.startsWith('special_')) { spawnSpecialWeapon(w.type, w, angle, now); } 
+            else {
+                bullets.push({ x: player.x, y: player.y, vx: w.speed === 0 ? 0 : Math.cos(angle)*w.speed, vy: w.speed === 0 ? 0 : Math.sin(angle)*w.speed, emoji: w.emoji, dmg: w.dmg, weaponId: curWeapon, creationTime: now, rebounces: 0 });
+            }
+            lastFired[curWeapon] = now;
+        }
+    }
+    
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        let b = bullets[i]; let w = weapons[b.weaponId];
+        for (let obj of mapObjects) {
+            if (obj.type === 'hacker' && b.x > obj.x && b.x < obj.x + obj.w && b.y > obj.y && b.y < obj.y + obj.h) {
+                b.vx *= -1; b.vy *= -1; b.x += b.vx * 2; b.y += b.vy * 2;
+            }
+        }
+        
+        b.x += b.vx; b.y += b.vy;
+        
+        if (w.type === 'cat') {
+            if (b.x <= 0 || b.x >= canvas.width) { b.vx *= -1; b.rebounces++; }
+            if (b.y <= 0 || b.y >= canvas.height) { b.vy *= -1; b.rebounces++; }
+            if (now - b.creationTime > 10000) { bullets.splice(i, 1); continue; }
+        }
+        
+        ctx.font = "30px Arial"; ctx.textAlign = "center"; ctx.fillText(b.emoji, b.x, b.y);
+        
+        let dist = Math.hypot(b.x-boss.x, b.y-boss.y); let hitRadius = 70;
+        if (dist < hitRadius) {
+            let hit = false;
+            if (w.type === 'punch') {
+                boss.x = (b.vx > 0) ? canvas.width - 150 : 150; boss.y = (b.vy > 0) ? canvas.height - 150 : 150;
+                boss.stunUntil = now + 8000; boss.isStunned = true; hit = true; showFloatingMessage("GOLPÀS CRÍTIC!", "yellow", "🥊");
+            }
+            else if (w.type === 'cat') { boss.hp -= (boss.maxHp * 0.20); hit = true; }
+            else { boss.hp -= b.dmg; hit = true; }
+            if (hit) bullets.splice(i, 1);
+        } else if (w.type !== 'cat' && (b.x < -50 || b.x > canvas.width+50 || b.y < -50 || b.y > canvas.height+50)) { bullets.splice(i, 1); }
+    }
+    
+    for (let i = bossBullets.length - 1; i >= 0; i--) {
+        let b = bossBullets[i];
+        for (let obj of mapObjects) {
+            if (obj.type === 'hacker' && b.x > obj.x && b.x < obj.x + obj.w && b.y > obj.y && b.y < obj.y + obj.h) {
+                b.vx *= -1; b.vy *= -1; b.x += b.vx * 2; b.y += b.vy * 2;
+            }
+        }
+        b.x += b.vx; b.y += b.vy; 
+        ctx.font = "30px Arial"; ctx.textAlign = "center"; ctx.fillText(b.emoji, b.x, b.y);
+        if (Math.hypot(b.x-player.x, b.y-player.y) < 40) { player.hp -= selectedBoss.dmg; bossBullets.splice(i, 1); }
+        else if (b.x < -50 || b.x > canvas.width+50 || b.y < -50 || b.y > canvas.height+50) bossBullets.splice(i, 1);
+    }
+    
+    updateAndDrawSpecials(now);
+
+    document.getElementById('p-fill').style.width = Math.max(0, (player.hp/player.maxHp)*100) + "%";
+    document.getElementById('b-fill').style.width = Math.max(0, (boss.hp/boss.maxHp)*100) + "%";
+    
+    purchasedWeapons.forEach(wId => {
+        let w = weapons[wId]; let elapsed = now - lastFired[wId];
+        let cdOverlay = document.getElementById('cd-' + wId);
+        if(cdOverlay) {
+            if(elapsed < w.rate) { cdOverlay.style.height = (100 - (elapsed / w.rate * 100)) + "%"; } 
+            else { cdOverlay.style.height = "0%"; }
+        }
+    });
+
+    if (player.hp <= 0 || boss.hp <= 0) { gameRunning = false; setTimeout(() => triggerEndgame(boss.hp <= 0), 500); } 
+    else { requestAnimationFrame(draw); }
+}
+
+function spawnSpecialWeapon(type, wData, angle, now) {
+    let spawnBase = { creationTime: now, weaponData: wData };
+    switch(type) {
+        case 'special_sombrero': specialEntities.push({...spawnBase, type: 'sombrero', x: player.x, y: player.y, vx: Math.cos(angle)*wData.speed, vy: Math.sin(angle)*wData.speed, baseX: player.x, baseY: player.y, curveAmp: (Math.random() > 0.5 ? 1 : -1) * 150, distanceTraveled: 0}); break;
+        case 'special_katana': specialEntities.push({...spawnBase, type: 'katana', x: player.x, y: player.y, vx: Math.cos(angle)*wData.speed, vy: Math.sin(angle)*wData.speed, angle: angle}); break;
+        case 'special_malabares': specialEntities.push({...spawnBase, type: 'malabar', x: player.x, y: player.y, vx: Math.cos(angle)*wData.speed, vy: Math.sin(angle)*wData.speed, startOffset: Math.random() * Math.PI * 2, dist: 0}); break;
+        case 'special_estrella': let ang = Math.atan2(boss.y, boss.x - (boss.x - 300)); specialEntities.push({...spawnBase, type: 'estrella', x: boss.x - 500, y: -200, vx: Math.cos(ang)*wData.speed, vy: Math.sin(ang)*wData.speed}); break;
+        case 'special_gorilla_summon': specialEntities.push({...spawnBase, type: 'tree', x: canvas.width/2, y: canvas.height/2, phase: 'growing'}); break;
+        case 'special_pies_buff': player.footprintBuffUntil = now + 10000; showFloatingMessage("BOTES TÒXIQUES!", "lime", "👣"); break;
+        case 'special_tumbas': for(let i=0; i<3; i++) specialEntities.push({...spawnBase, type: 'tumba', x: Math.random() * (canvas.width-100) + 50, y: Math.random() * (canvas.height-100) + 50, spawned: false}); break;
+        case 'special_zapato': specialEntities.push({...spawnBase, type: 'zapato', x: boss.x, y: -300, vy: 35 }); break;
+        case 'special_gancho': specialEntities.push({...spawnBase, type: 'gancho', x: boss.x, y: -100, targetY: boss.y, state: 'lowering'}); break;
+        case 'special_notas': for(let i=-1; i<=1; i++) specialEntities.push({...spawnBase, type: 'nota', x: player.x, y: player.y, vx: Math.cos(angle + i*0.3)*5, vy: Math.sin(angle + i*0.3)*5}); break;
+        case 'special_iman': boss.magnetStunUntil = now + 10000; showFloatingMessage("ATRACCIÓ MAGNÈTICA!", "cyan", "🧲"); break;
+        case 'special_patines': specialEntities.push({...spawnBase, type: 'patin', x: player.x, y: player.y, vx: Math.cos(angle)*wData.speed, vy: Math.sin(angle)*wData.speed}); break;
+        case 'special_avion': specialEntities.push({...spawnBase, type: 'avion', x: -100, y: -100, targetX: boss.x, targetY: boss.y, progress: 0}); break;
+        case 'special_luna': boss.lunaBlindUntil = now + 15000; showFloatingMessage("NIT FOSCA...", "purple", "🌚"); break;
+    }
+}
+
+function updateAndDrawSpecials(now) {
+    for (let i = specialEntities.length - 1; i >= 0; i--) {
+        let ent = specialEntities[i]; let w = ent.weaponData; let remove = false;
+        ctx.save();
+        let hitBoss = Math.hypot(ent.x - boss.x, ent.y - boss.y) < 75;
+
+        if(ent.vx !== undefined && ent.vy !== undefined) {
+            for (let obj of mapObjects) {
+                if (obj.type === 'hacker' && ent.x > obj.x && ent.x < obj.x + obj.w && ent.y > obj.y && ent.y < obj.y + obj.h) {
+                    ent.vx *= -1; ent.vy *= -1; ent.x += ent.vx * 2; ent.y += ent.vy * 2;
+                }
+            }
+        }
+
+        switch(ent.type) {
+            case 'sombrero':
+                ent.distanceTraveled += w.speed;
+                let perpAng = Math.atan2(ent.vy, ent.vx) + Math.PI/2;
+                let offset = Math.sin(ent.distanceTraveled * 0.01) * ent.curveAmp;
+                ent.x = (ent.baseX + ent.vx * (ent.distanceTraveled / w.speed)) + Math.cos(perpAng) * offset;
+                ent.y = (ent.baseY + ent.vy * (ent.distanceTraveled / w.speed)) + Math.sin(perpAng) * offset;
+                ctx.font = "40px Arial"; ctx.fillText(w.emoji, ent.x, ent.y);
+                if(hitBoss) { boss.hp -= w.dmg; remove = true; }
+                break;
+            case 'katana':
+                ent.x += ent.vx; ent.y += ent.vy; ctx.translate(ent.x, ent.y); ctx.rotate(ent.angle + Math.PI/4);
+                ctx.font = "50px Arial"; ctx.fillText(w.emoji, 0, 0);
+                if(hitBoss) {
+                    boss.hp -= w.dmg; remove = true;
+                    for(let j=0; j<15; j++) specialEntities.push({ type: 'blood_particle', x: boss.x, y: boss.y, vx: (Math.random()-0.5)*15, vy: (Math.random()-1)*15, creationTime: now });
+                }
+                break;
+            case 'malabar':
+                ent.dist += w.speed; ent.x += ent.vx; ent.y += ent.vy;
+                let mpAng = Math.atan2(ent.vy, ent.vx) + Math.PI/2;
+                let rx = ent.x + Math.cos(mpAng) * (Math.sin(ent.dist * 0.05 + ent.startOffset) * 50);
+                let ry = ent.y + Math.sin(mpAng) * (Math.sin(ent.dist * 0.05 + ent.startOffset) * 50);
+                ctx.font = "40px Arial"; ctx.fillText(w.emoji, rx, ry);
+                if(Math.hypot(rx - boss.x, ry - boss.y) < 75) { boss.hp -= w.dmg; remove = true; }
+                break;
+            case 'estrella':
+                ent.x += ent.vx; ent.y += ent.vy; ctx.beginPath(); ctx.moveTo(ent.x, ent.y); ctx.lineTo(ent.x - ent.vx*5, ent.y - ent.vy*5);
+                ctx.strokeStyle = 'yellow'; ctx.lineWidth = 5; ctx.stroke(); ctx.font = "60px Arial"; ctx.fillText(w.emoji, ent.x, ent.y);
+                if(hitBoss) { boss.hp -= w.dmg; remove = true; }
+                break;
+            case 'tree':
+                if (now - ent.creationTime < 1000) { ctx.font = "80px Arial"; ctx.fillText("🌲", ent.x + (Math.sin((now - ent.creationTime)*0.05) * 10), ent.y); } 
+                else { remove = true; for(let k=0; k<3; k++) specialEntities.push({ type: 'gorilla', x: ent.x, y: ent.y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, weaponData: w }); }
+                break;
+            case 'gorilla':
+                let ga = Math.atan2(boss.y - ent.y, boss.x - ent.x);
+                ent.vx = ent.vx * 0.95 + Math.cos(ga) * 0.5; ent.vy = ent.vy * 0.95 + Math.sin(ga) * 0.5;
+                ent.x += ent.vx; ent.y += ent.vy; ctx.font = "40px Arial"; ctx.fillText(w.emoji, ent.x, ent.y);
+                if(hitBoss) { boss.hp -= w.dmg; remove = true; }
+                break;
+            case 'footprint':
+                let lifeTime = now - ent.creationTime;
+                if(lifeTime > 15000) { remove = true; break; }
+                ctx.globalAlpha = 1 - (lifeTime / 15000); ctx.font = "30px Arial"; ctx.fillText("👣", ent.x, ent.y);
+                if(hitBoss) { boss.hp -= ent.weaponData.dmg; remove = true; } 
+                break;
+            case 'tumba':
+                if(!ent.spawned && now - ent.creationTime > 1500) { ent.spawned = true; specialEntities.push({ type: 'zombi', x: ent.x, y: ent.y, weaponData: w }); }
+                ctx.globalAlpha = ent.spawned ? 0.3 : 1; ctx.font = "60px Arial"; ctx.fillText(w.emoji, ent.x, ent.y);
+                if(now - ent.creationTime > 5000) remove = true; 
+                break;
+            case 'zombi':
+                let za = Math.atan2(boss.y - ent.y, boss.x - ent.x);
+                ent.x += Math.cos(za)*3; ent.y += Math.sin(za)*3; ctx.font = "40px Arial"; ctx.fillText("🧟", ent.x, ent.y);
+                if(hitBoss) { boss.hp -= w.dmg; remove = true; }
+                break;
+            case 'zapato':
+                ent.y += ent.vy; ctx.font = "150px Arial"; ctx.fillText(w.emoji, ent.x, ent.y);
+                if(ent.y > boss.y) { boss.hp -= w.dmg; remove = true; showFloatingMessage("SPLAT!", "orange"); }
+                break;
+            case 'gancho':
+                ctx.strokeStyle = "#888"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(ent.x, 0); ctx.lineTo(ent.x, ent.y); ctx.stroke();
+                ctx.font = "60px Arial"; ctx.fillText(w.emoji, ent.x, ent.y);
+                if(ent.state === 'lowering') { ent.y += 10; if(ent.y >= boss.y) { ent.state = 'grabbed'; ent.grabTime = now; boss.isStunned = true; boss.stunUntil = now + 1000; } } 
+                else if(ent.state === 'grabbed') { if(now - ent.grabTime > 1000) { boss.hp -= w.dmg; ent.state = 'retracting'; } } 
+                else { ent.y -= 15; if(ent.y < -100) remove = true; }
+                break;
+            case 'nota':
+                let na = Math.atan2(boss.y - ent.y, boss.x - ent.x);
+                ent.vx = ent.vx * 0.98 + Math.cos(na) * 0.3; ent.vy = ent.vy * 0.98 + Math.sin(na) * 0.3;
+                ent.x += ent.vx; ent.y += ent.vy;
+                ctx.fillStyle = `hsl(${(now/10)%360}, 100%, 50%)`; ctx.font = "30px Arial"; ctx.fillText(w.emoji, ent.x, ent.y);
+                if(hitBoss) { boss.hp -= w.dmg; remove = true; }
+                break;
+            case 'patin':
+                ent.x += ent.vx; ent.y += ent.vy; ctx.font = "50px Arial"; ctx.fillText(w.emoji, ent.x, ent.y);
+                if(hitBoss) { boss.hp -= w.dmg; remove = true; }
+                break;
+            case 'avion':
+                ent.progress += 0.02; ent.x = -100 + (ent.targetX + 100) * ent.progress; ent.y = -100 + (ent.targetY + 100) * ent.progress;
+                ctx.font = "80px Arial"; ctx.fillText(w.emoji, ent.x, ent.y);
+                if(ent.progress >= 1) { boss.hp -= w.dmg; specialEntities.push({ type: 'explosion', x: boss.x, y: boss.y, radius: 10, maxRadius: 200, creationTime: now }); remove = true; }
+                break;
+            case 'explosion':
+                ent.radius += 10; ctx.beginPath(); ctx.arc(ent.x, ent.y, ent.radius, 0, Math.PI*2);
+                ctx.fillStyle = `rgba(255, ${Math.random()*255}, 0, ${1 - ent.radius/ent.maxRadius})`; ctx.fill();
+                for(let j = bossBullets.length - 1; j >= 0; j--) { if(Math.hypot(bossBullets[j].x - ent.x, bossBullets[j].y - ent.y) < ent.radius) { bossBullets.splice(j, 1); } }
+                if(ent.radius >= ent.maxRadius) remove = true;
+                break;
+            case 'blood_particle':
+                ent.vy += 0.5; ent.x += ent.vx; ent.y += ent.vy; ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(ent.x, ent.y, 4, 0, Math.PI*2); ctx.fill();
+                if(ent.vy > 0) {
+                    for(let mapO of mapObjects) {
+                        if(mapO.type === 'herba' && ent.x > mapO.x && ent.x < mapO.x + mapO.w && ent.y > mapO.y && ent.y < mapO.y + mapO.h) {
+                            mapO.bloodDrops.push({x: ent.x, y: ent.y}); remove = true; break;
+                        }
+                    }
+                }
+                if(now - ent.creationTime > ent.life || ent.y > canvas.height) remove = true;
+                break;
+        }
+        ctx.restore();
+        if (!remove && ent.type !== 'explosion' && ent.type !== 'footprint' && ent.type !== 'gancho' && ent.type !== 'tree' && ent.type !== 'tumba' && ent.type !== 'blood_particle' && ent.type !== 'avion') {
+            if (ent.x < -100 || ent.x > canvas.width+100 || ent.y < -200 || ent.y > canvas.height+100) remove = true;
+        }
+        if (remove) specialEntities.splice(i, 1);
+    }
+}
+
+window.addEventListener('keydown', e => {
+    keys[e.key] = true; let k = e.key.toLowerCase();
+    if(activeKeyMap[k] !== undefined) selectWeapon(activeKeyMap[k]);
+    if (k === 'x' && gameRunning && boss) {
+        if (boss.hp <= boss.maxHp * 0.3) {
+            sunActiveUntil = Date.now() + 2000;
+            mapObjects = mapObjects.filter(obj => obj.type !== 'aigua');
+        }
+    }
+});
+window.addEventListener('keyup', e => keys[e.key] = false);
+window.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+window.addEventListener('mousedown', () => isMouseDown = true);
+window.addEventListener('mouseup', () => isMouseDown = false);
+window.addEventListener('resize', () => { if(gameRunning) { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } });
+
+function triggerEndgame(isVictory) {
+    document.getElementById('ui').style.display = 'none'; canvas.style.display = 'none';
+    let endDiv = document.getElementById('endgame-animation');
+    let title = document.getElementById('endgame-title');
+    let subtitle = document.getElementById('endgame-subtitle');
+    endDiv.style.display = 'flex';
+    if(isVictory) {
+        let mult = avatars[curForm].multiplier || 1;
+        let totalCopes = Math.floor(15 * mult); let xpGuanyat = Math.floor(25 * mult);
+        copes += totalCopes; xp += xpGuanyat;
+        if(activeMission) missionProgressCopes += totalCopes;
+        title.innerText = "VICTÒRIA IMPONENT!"; title.style.color = "#32ff32"; subtitle.innerText = `+${totalCopes} 🏆  |  +${xpGuanyat} ⭐`;
+    } else {
+        copes = Math.max(0, copes - 10); 
+        title.innerText = "DERROTA TOTAL..."; title.style.color = "#ff0000"; subtitle.innerText = "Has perdut -10 🏆";
+    }
+    updateUI();
+}
+
+function skipAnimation() { document.getElementById('endgame-animation').style.display = 'none'; goHome(); }
+
+function openShop() {
+    document.getElementById('menu-world').style.display = 'none'; document.getElementById('page-shop').style.display = 'flex';
+    document.getElementById('back-from-shop').style.display = 'block'; renderShop();
+}
+
+function renderShop() {
+    const container = document.getElementById('shop-grid-container'); container.innerHTML = "";
+    Object.keys(weapons).forEach(wId => {
+        if(wId === "0") return; 
+        let w = weapons[wId]; let isOwned = purchasedWeapons.includes(parseInt(wId)); let canAfford = xp >= w.costXp;
+        let card = document.createElement('div'); card.className = `shop-item ${isOwned ? 'purchased' : ''}`;
+        let btnHTML = isOwned ? `<button class="buy-weapon-btn owned" disabled>ADQUIRIT</button>` : 
+                     (canAfford ? `<button class="buy-weapon-btn buyable" onclick="buyWeapon(${wId})">COMPRAR (${w.costXp} ⭐)</button>` : 
+                                  `<button class="buy-weapon-btn locked" disabled>FALTA XP (${w.costXp} ⭐)</button>`);
+        card.innerHTML = `
+            <div class="shop-item-emoji">${w.emoji}</div><div class="shop-item-title">${w.name}</div>
+            <div class="shop-item-desc">${w.desc}</div>
+            <div class="shop-item-stats"><span>⚔️ DMG: ${w.dmg}</span><span>⏱️ CD: ${(w.rate/1000).toFixed(1)}s</span></div>
+            ${btnHTML}
+        `;
+        container.appendChild(card);
+    });
+}
+
+function buyWeapon(wId) {
+    let w = weapons[wId];
+    if(xp >= w.costXp && !purchasedWeapons.includes(parseInt(wId))) {
+        xp -= w.costXp; purchasedWeapons.push(parseInt(wId));
+        localStorage.setItem('purchasedWeapons', JSON.stringify(purchasedWeapons));
+        updateUI(); renderShop(); showFloatingMessage(`Has comprat: ${w.name}`, "var(--accent-cyan)", "🎉");
+    }
+}
+
+/* ==========================================================================
+   SISTEMA DE CODIS (NOU)
+   ========================================================================== */
+function openCodes() {
+    document.getElementById('menu-world').style.display = 'none';
+    document.getElementById('page-codes').style.display = 'flex';
+    document.getElementById('back-from-codes').style.display = 'block';
+    document.getElementById('input-code').value = ""; // Netejar input
+}
+
+function redeemCode() {
+    let codeInput = document.getElementById('input-code').value.trim().toLowerCase();
+    if (codeInput === "") return;
+    
+    if (usedCodes.includes(codeInput)) {
+        alert("Aquest codi ja ha estat utilitzat en aquest compte!");
+        return;
+    }
+
+    let success = false;
+    let message = "";
+
+    if (codeInput === "gototheredline") {
+        unlockBrawlerAndSkin(18, 1); // Regala Luffy + la seva skin 1
+        message = "Has desbloquejat: LUFFY!";
+        success = true;
+    } else if (codeInput === "starter") {
+        copes += 100;
+        xp += 300;
+        message = "Has rebut +100 🏆 i +300 ⭐!";
+        success = true;    
+    } else if (codeInput === "nooakiratoriyamarip") {
+        unlockBrawlerAndSkin(8, 1); // Regala BlackGoku + goku4
+        message = "Has desbloquejat: BLACK GOKU i el seu aspecte Goku4!";
+        success = true;
+    } else if (codeInput === "subhablack09") {
+        unlockBrawlerAndSkin(7, 1); // Regala Hablack09 + Hablack Omega
+        message = "Has desbloquejat: HABLACK09 i el seu aspecte Omega!";
+        success = true;
+    } else if (codeInput === "oiia") {
+        // Comprovem que no tingui ja l'arma comprada
+        if (!purchasedWeapons.includes(7)) {
+            purchasedWeapons.push(7);
+            localStorage.setItem('purchasedWeapons', JSON.stringify(purchasedWeapons));
+        }
+        message = "Has desbloquejat l'arma: GAT REBOTADOR!";
+        success = true;
+    } else if (codeInput === "gorilondo") {
+        // Comprovem que no tingui ja l'arma comprada
+        if (!purchasedWeapons.includes(11)) {
+            purchasedWeapons.push(11);
+            localStorage.setItem('purchasedWeapons', JSON.stringify(purchasedWeapons));
+        }
+        message = "Has desbloquejat l'arma: GAT REBOTADOR!";
+        success = true;
+    } else {
+        alert("Codi invàlid o inexistent.");
+    }
+
+    if (success) {
+        usedCodes.push(codeInput);
+        localStorage.setItem('usedCodes', JSON.stringify(usedCodes));
+        updateUI();
+        showFloatingMessage(message, "var(--accent-pink)", "🎁");
+        document.getElementById('input-code').value = "";
+    }
+}
+
+function unlockBrawlerAndSkin(brawlerId, skinId) {
+    if (!unlockedChars.includes(brawlerId)) unlockedChars.push(brawlerId);
+    if (!unlockedSkins[brawlerId]) unlockedSkins[brawlerId] = [0];
+    if (skinId !== 0 && !unlockedSkins[brawlerId].includes(skinId)) {
+        unlockedSkins[brawlerId].push(skinId);
+    }
+    localStorage.setItem('unlockedChars', JSON.stringify(unlockedChars));
+    localStorage.setItem('unlockedSkins', JSON.stringify(unlockedSkins));
+}
+
+function openRewards() {
+    document.getElementById('menu-world').style.display = 'none'; document.getElementById('page-rewards').style.display = 'flex';
+    document.getElementById('back-from-rewards').style.display = 'block';
+}
+
+function startMission(minutes, targetCopes, rewardXP) {
+    if(activeMission) { alert("Ja tens una missió activa!"); return; }
+    activeMission = { target: targetCopes, xp: rewardXP, endTime: Date.now() + (minutes * 60000) }; missionProgressCopes = 0;
+    document.getElementById('mission-tracker').style.display = 'block'; document.getElementById('page-rewards').style.display = 'none'; goHome();
+    missionInterval = setInterval(() => {
+        if(!activeMission) return clearInterval(missionInterval);
+        let timeLeft = activeMission.endTime - Date.now();
+        if(timeLeft <= 0) {
+            clearInterval(missionInterval); alert("TEMPS ESGOTAT! Missió fallida."); activeMission = null; document.getElementById('mission-tracker').style.display = 'none';
+        } else {
+            let mins = Math.floor(timeLeft / 60000); let secs = Math.floor((timeLeft % 60000) / 1000);
+            document.getElementById('track-time').innerText = `${mins}:${secs < 10 ? '0'+secs : secs}`;
+            document.getElementById('track-progress').innerText = `Guanyat: ${missionProgressCopes} / ${activeMission.target} 🏆`;
+            if(missionProgressCopes >= activeMission.target) {
+                clearInterval(missionInterval); showFloatingMessage("MISSIÓ COMPLETADA!", "var(--accent-pink)", "🎁");
+                xp += activeMission.xp; activeMission = null; document.getElementById('mission-tracker').style.display = 'none'; updateUI();
+            }
+        }
+    }, 1000);
+}
+
+function goHome() {
+    gameRunning = false; document.querySelectorAll('.menu').forEach(m => m.style.display = 'none');
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.style.display = 'none');
+    document.getElementById('ui').style.display = 'none'; canvas.style.display = 'none';
+    document.getElementById('menu-world').style.display = 'flex'; updateUI();
+}
+
+function goBackToWorld() { document.getElementById('menu-avatar').style.display = 'none'; document.getElementById('menu-world').style.display = 'flex'; document.getElementById('back-to-world').style.display = 'none'; }
+
+function openLevels() {
+    document.getElementById('menu-world').style.display = 'none'; document.getElementById('page-levels').style.display = 'flex'; document.getElementById('back-from-levels').style.display = 'block';
+    const container = document.getElementById('levels-container'); container.innerHTML = "";
+    levelRewards.forEach(lvl => {
+        let isClaimed = claimedLevels.includes(lvl.id); let canClaim = !isClaimed && copes >= lvl.copes; let isLocked = copes < lvl.copes;
+        let div = document.createElement('div'); div.className = `level-card ${!isLocked ? 'unlocked' : ''}`;
+        div.innerHTML = `
+            <div><strong style="color:${isLocked ? '#777' : '#fff'}; font-size: 20px;">${lvl.text}</strong><div style="font-size:14px; color:#aaa; margin-top:5px;">Req: ${lvl.copes} 🏆</div></div>
+            <div style="text-align:right">
+                <div style="color:#ff00ff; font-weight:bold; font-size: 22px; margin-bottom: 5px;">+${lvl.xp} XP</div>
+                <button class="claim-btn" ${canClaim ? '' : 'disabled'} onclick="claimLevel(${lvl.id}, ${lvl.xp})">${isClaimed ? 'RECOLLIT' : (isLocked ? 'BLOQUEJAT' : 'RECOLLIR')}</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function claimLevel(id, rewardXP) {
+    if(claimedLevels.includes(id)) return;
+    xp += rewardXP; claimedLevels.push(id); localStorage.setItem('claimedLevels', JSON.stringify(claimedLevels));
+    updateUI(); openLevels(); showFloatingMessage("RECOMPENSA DE NIVELL!", "gold", "⭐");
+}
+
+function openAvatarMenu() {
+    document.getElementById('menu-world').style.display = 'none'; document.getElementById('menu-avatar').style.display = 'flex'; document.getElementById('back-to-world').style.display = 'block';
+    let gridContainer = document.getElementById('avatar-grid-container'); gridContainer.innerHTML = "";
+    for(let id in avatars) {
+        let av = avatars[id]; let isUnlocked = unlockedChars.includes(parseInt(id));
+        let currentSkinId = (isUnlocked && selectedSkins[id] !== undefined) ? selectedSkins[id] : 0; let activeSkin = av.skins[currentSkinId];
+        let card = document.createElement('div'); card.id = 'card-' + id; card.className = "avatar-card";
+        if(id == tempSelected) card.classList.add('selected');
+        let lockOverlay = !isUnlocked ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; font-size:30px; border-radius:8px;">🔒</div>` : "";
+        card.innerHTML = `
+            <div style="position:relative; width:80px; height:80px; margin:0 auto;">
+                <img src="${activeSkin.imgSrc}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'%3E%3Crect fill=\\'%23555\\' width=\\'100\\' height=\\'100\\'/%3E%3C/svg%3E'">
+                ${lockOverlay}
+            </div>
+            <div style="font-size:12px; margin-top:8px; font-weight:bold; color:${isUnlocked ? 'white' : '#777'};">${av.name}</div>
+        `;
+        card.onclick = () => { tempSelected = id; updateAvatarPreview(); }; gridContainer.appendChild(card);
+    }
+    updateAvatarPreview();
+}
+
+function equipSkin(brawlerId, skinId) {
+    selectedSkins[brawlerId] = skinId;
+    localStorage.setItem('selectedSkins', JSON.stringify(selectedSkins));
+    updateAvatarPreview();
+    openAvatarMenu(); 
+}
+
+function buySkin(brawlerId, skinId, costCopes, costXp) {
+    if (copes >= costCopes && xp >= costXp) {
+        copes -= costCopes; xp -= costXp;
+        unlockedSkins[brawlerId].push(skinId);
+        localStorage.setItem('unlockedSkins', JSON.stringify(unlockedSkins));
+        updateUI(); equipSkin(brawlerId, skinId); showFloatingMessage("Aspecte desbloquejat!", "var(--accent-cyan)", "✨");
+    } else { alert("Et falten Copes o XP per adquirir aquest aspecte!"); }
+}
+
+function updateAvatarPreview() {
+    let av = avatars[tempSelected]; let isUnlocked = unlockedChars.includes(parseInt(tempSelected));
+    let currentSkinId = isUnlocked ? (selectedSkins[tempSelected] || 0) : 0; let activeSkin = av.skins[currentSkinId];
+    
+    document.querySelectorAll('.avatar-card').forEach(c => c.classList.remove('selected'));
+    let activeCard = document.getElementById('card-' + tempSelected); if(activeCard) activeCard.classList.add('selected');
+    
+    let previewDiv = document.getElementById('avatar-preview');
+    previewDiv.innerHTML = `<img src="${activeSkin.imgSrc}" style="height:250px; object-fit:contain; animation: float 3s infinite ease-in-out;" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'%3E%3Crect fill=\\'%23555\\' width=\\'100\\' height=\\'100\\'/%3E%3C/svg%3E'">`;
+    
+    document.getElementById('avatar-name').innerText = av.name;
+    document.getElementById('avatar-desc').innerText = av.desc;
+    document.getElementById('avatar-speed').innerText = "Velo.: " + av.speed;
+    document.getElementById('avatar-hp').innerText = "Vida M.: " + activeSkin.hp;
+    
+    let skinsContainer = document.getElementById('skins-container');
+    let btnAction = document.getElementById('action-btn');
+    
+    if (isUnlocked) {
+        btnAction.innerText = "JUGAR AMB " + av.name.toUpperCase(); btnAction.style.background = "#00bcff";
+        btnAction.onclick = () => {
+            curForm = tempSelected; document.getElementById('menu-avatar').style.display = 'none';
+            document.getElementById('menu-boss').style.display = 'flex'; document.getElementById('back-to-world').style.display = 'none';
+        };
+        
+        skinsContainer.innerHTML = "";
+        av.skins.forEach(skin => {
+            let isSkinUnlocked = unlockedSkins[tempSelected].includes(skin.id);
+            let isSkinEquipped = selectedSkins[tempSelected] === skin.id;
+            
+            let div = document.createElement('div'); div.className = "skin-row";
+            if(isSkinEquipped) div.style.border = "2px solid #00ffff";
+            
+            let btnHTML = "";
+            if (isSkinEquipped) { btnHTML = `<button disabled style="background:#444; color:white; padding:10px 15px; border-radius:8px; border:none; font-weight:bold;">EQUIPAT</button>`; } 
+            else if (isSkinUnlocked) { btnHTML = `<button onclick="equipSkin(${tempSelected}, ${skin.id})" style="background:#00bcff; color:white; padding:10px 15px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">EQUIPAR</button>`; } 
+            else { btnHTML = `<button onclick="buySkin(${tempSelected}, ${skin.id}, ${skin.costCopes}, ${skin.costXp})" style="background:#ffcc00; color:black; font-weight:bold; padding:10px 15px; border-radius:8px; border:none; cursor:pointer;">${skin.costCopes}🏆 + ${skin.costXp}⭐</button>`; }
+            
+            div.innerHTML = `
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <img src="${skin.imgSrc}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'%3E%3Crect fill=\\'%23555\\' width=\\'100\\' height=\\'100\\'/%3E%3C/svg%3E'">
+                    <div style="text-align:left;">
+                        <div style="color:white; font-size:16px; font-weight:bold;">${skin.name}</div>
+                        <div style="color:#32ff32; font-size:13px;">Vida Màx: ${skin.hp}</div>
+                    </div>
+                </div>
+                ${btnHTML}
+            `;
+            skinsContainer.appendChild(div);
+        });
+    } else {
+        skinsContainer.innerHTML = "<div style='color:#777; font-size:16px; text-align:center; padding: 20px;'>Desbloqueja primer el Brawler per veure i equipar els seus aspectes especials.</div>";
+        btnAction.innerText = `COMPRAR (${av.cost} 🏆)`; btnAction.style.background = "#ffcc00";
+        btnAction.onclick = () => {
+            if(copes >= av.cost) {
+                copes -= av.cost; unlockedChars.push(parseInt(tempSelected));
+                unlockedSkins[tempSelected] = [0]; selectedSkins[tempSelected] = 0;
+                localStorage.setItem('unlockedChars', JSON.stringify(unlockedChars));
+                localStorage.setItem('unlockedSkins', JSON.stringify(unlockedSkins));
+                localStorage.setItem('selectedSkins', JSON.stringify(selectedSkins));
+                updateUI(); openAvatarMenu(); showFloatingMessage("BRAWLER ADQUIRIT!", "cyan");
+            } else { alert("Et falten Copes per comprar aquest Brawler!"); }
+        };
+    }
+}
+
+function spinRoulette() {
+    let random = allBosses[Math.floor(Math.random() * allBosses.length)];
+    selectedBoss = random;
+    document.getElementById('roulette-display').innerText = random.projectile;
+    document.getElementById('boss-random-name').innerText = random.name;
+    
+    let spins = 0, maxSpins = 15;
+    let interval = setInterval(() => {
+        spins++;
+        document.getElementById('roulette-display').innerText = allBosses[Math.floor(Math.random() * allBosses.length)].projectile;
+        if(spins >= maxSpins) {
+            clearInterval(interval);
+            document.getElementById('roulette-display').innerText = random.projectile;
+            setTimeout(() => { startGame(); }, 1000);
+        }
+    }, 100);
+}
+
+/* ==========================================================================
+   SISTEMA DE PERFIL (GUARDAR I CARREGAR CODIS DE TRANSFERÈNCIA)
+   ========================================================================== */
+function openProfile() {
+    document.getElementById('menu-world').style.display = 'none';
+    document.getElementById('menu-profile').style.display = 'flex';
+    document.getElementById('input-player-name').value = playerName;
+    
+    let currentSkinId = selectedSkins[curForm] || 0;
+    let av = avatars[curForm] || avatars[1];
+    let activeSkin = av.skins[currentSkinId];
+    
+    document.getElementById('profile-icon').innerHTML = `<img src="${activeSkin.imgSrc}" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">`;
+}
+
+function closeProfile() {
+    document.getElementById('menu-profile').style.display = 'none';
+    document.getElementById('menu-world').style.display = 'flex';
+}
+
+function saveName() {
+    let name = document.getElementById('input-player-name').value;
+    if(name.trim() !== "") {
+        playerName = name;
+        localStorage.setItem('playerName', playerName);
+        showFloatingMessage("Nom guardat correctament!", "lime");
+    }
+}
+
+function generateSaveCode() {
+    let saveObj = {
+        copes: copes,
+        xp: xp,
+        unlockedChars: unlockedChars,
+        unlockedSkins: unlockedSkins,
+        selectedSkins: selectedSkins,
+        purchasedWeapons: purchasedWeapons,
+        claimedLevels: claimedLevels,
+        usedCodes: usedCodes, // Afegit el sistema de codis al guardat
+        name: playerName
+    };
+    let json = JSON.stringify(saveObj);
+    let encoded = btoa(json);
+    document.getElementById('data-string').value = encoded;
+}
+
+function loadSaveCode() {
+    let encoded = document.getElementById('data-string').value;
+    if(!encoded) return;
+    try {
+        let json = atob(encoded);
+        let data = JSON.parse(json);
+        
+        if(data.copes !== undefined) {
+            localStorage.setItem('centes', data.copes);
+            localStorage.setItem('xp', data.xp || 0);
+            localStorage.setItem('unlockedChars', JSON.stringify(data.unlockedChars || [1]));
+            localStorage.setItem('unlockedSkins', JSON.stringify(data.unlockedSkins || {}));
+            localStorage.setItem('selectedSkins', JSON.stringify(data.selectedSkins || {}));
+            localStorage.setItem('purchasedWeapons', JSON.stringify(data.purchasedWeapons || [0]));
+            localStorage.setItem('claimedLevels', JSON.stringify(data.claimedLevels || []));
+            localStorage.setItem('usedCodes', JSON.stringify(data.usedCodes || [])); // Recupera codis gastats
+            if(data.name) localStorage.setItem('playerName', data.name);
+            
+            alert("Dades carregades correctament! La pàgina es recarregarà.");
+            location.reload();
+        }
+    } catch(e) {
+        alert("Codi invàlid o corrupte.");
+    }
+}
+
+// INICIALITZACIÓ
+updateUI();
+</script>
+</body>
+</html>
