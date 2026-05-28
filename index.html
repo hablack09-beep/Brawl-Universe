@@ -386,101 +386,6 @@
             margin-top: auto; /* FIX: Empeny el botó cap avall de forma ordenada */
         }
         
-        .shop-item {
-            background: rgba(0,0,0,0.6);
-            border: 3px solid #555;
-            border-radius: 15px;
-            padding: 25px 20px;
-            text-align: center;
-            transition: 0.3s;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .shop-item:hover { 
-            border-color: var(--accent-cyan); 
-            transform: scale(1.05); 
-            box-shadow: 0 0 20px rgba(0, 188, 255, 0.3);
-        }
-        
-        .shop-item.purchased { 
-            border-color: var(--accent-gold); 
-        }
-        
-        .shop-item.equipped { 
-            border-color: var(--accent-green); 
-            background: rgba(0, 50, 0, 0.6);
-            box-shadow: 0 0 20px rgba(50, 255, 50, 0.5);
-        }
-
-        /* NOUS ESTILS PER A LA NOVA PRESENTACIÓ DE LA BOTIGA D'ARMES */
-        .shop-item-emoji { 
-            font-size: 80px; 
-            margin-bottom: 15px; 
-            filter: drop-shadow(2px 4px 6px black); 
-        }
-        
-        .shop-item-title { 
-            color: var(--accent-gold); 
-            font-size: 28px; 
-            margin-bottom: 15px; 
-            text-shadow: 2px 2px 4px black;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        .shop-item-stats { 
-            font-size: 16px; 
-            color: #fff; 
-            margin-bottom: 15px; 
-            display: flex; 
-            flex-direction: column;
-            gap: 8px;
-            background: rgba(0,0,0,0.7); 
-            padding: 15px; 
-            border-radius: 10px;
-            border: 1px solid #444;
-        }
-
-        .shop-stat-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
-        }
-
-        .shop-stat-row:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .shop-item-status-display {
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            background: rgba(0,0,0,0.5);
-            border: 2px solid transparent;
-        }
-        
-        /* BOTONS D'ACCIÓ A LA BOTIGA */
-        .buy-weapon-btn {
-            padding: 15px; 
-            font-size: 18px; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            width: 100%;
-            transition: background-color 0.2s, transform 0.2s;
-            text-transform: uppercase;
-        }
-        
         .buy-weapon-btn.buyable { background: #ffcc00; color: black; box-shadow: 0 4px 0 #b38f00;}
         .buy-weapon-btn.buyable:active { transform: translateY(4px); box-shadow: 0 0 0 #b38f00; }
         
@@ -748,7 +653,6 @@
         }
 
         /* AVATARS I ROULETTE */
-        #avatar-grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; width: 100%; max-height: 65vh; overflow-y: auto; padding-right: 15px; }
         .avatar-card { background: rgba(0,0,0,0.6); border: 3px solid #555; border-radius: 12px; cursor: pointer; padding: 15px 10px; text-align: center; transition: 0.2s; }
         .avatar-card:hover { transform: scale(1.05); border-color: #aaa; }
         .avatar-card.selected { border-color: #00ffff; box-shadow: 0 0 15px #00ffff; }
@@ -928,9 +832,14 @@
          PÀGINA 7: SELECCIÓ BRAWLERS I SKINS
          ========================================================================== -->
     <div id="menu-avatar" class="menu" style="display:none; flex-direction:row; align-items:flex-start; justify-content:center; padding-top:100px; width:95%; max-width:1600px; margin:0 auto; gap:40px;">
-        <div style="flex:1.5; padding:30px; border-right: 4px solid #00ffff; height: 75vh; background: rgba(0,0,0,0.4); border-radius: 20px;">
+        <div style="flex:1.5; padding:30px; border-right: 4px solid #00ffff; height: 75vh; background: rgba(0,0,0,0.4); border-radius: 20px; overflow-y: auto;">
             <h2 style="color:gold; margin-top:0; font-size: 35px; text-shadow: 0 0 15px gold; text-align: center; margin-bottom: 20px;">SELECCIÓ DE BRAWLER</h2>
-            <div id="avatar-grid-container"></div>
+            
+            <h3 style="color:#32ff32; text-align: center; border-bottom: 2px solid #32ff32; padding-bottom: 10px; margin-bottom: 20px;">BRAWLERS DESBLOQUEJATS</h3>
+            <div id="avatar-grid-unlocked" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; width: 100%; margin-bottom: 40px;"></div>
+            
+            <h3 style="color:#ff4444; text-align: center; border-bottom: 2px solid #ff4444; padding-bottom: 10px; margin-bottom: 20px;">BRAWLERS PER DESBLOQUEJAR</h3>
+            <div id="avatar-grid-locked" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; width: 100%;"></div>
         </div>
         
         <div style="flex:1; padding:40px 50px; display:flex; flex-direction:column; align-items:center; height: 75vh; overflow-y:auto; background: rgba(0, 255, 255, 0.05); border-radius: 20px; box-shadow: inset 0 0 30px rgba(0,255,255,0.1); border: 2px solid rgba(0,255,255,0.2);">
@@ -1078,6 +987,48 @@
      MOTOR PRINCIPAL DE JAVASCRIPT (LÒGICA DEL JOC, UI I DESAT)
      ========================================================================== -->
 <script>
+// ====== CONFIGURACIÓ DE LA MÚSICA ======
+const musicaMenu = new Audio('menu.mp3'); 
+const musicaJoc = new Audio('bati.mp3'); 
+
+musicaMenu.loop = true;
+musicaJoc.loop = true;
+musicaMenu.volume = 0.5;
+musicaJoc.volume = 0.6;
+
+let audioIniciat = false;
+
+// Utilitzem async/await per evitar l'error de "The play() request was interrupted by a call to pause()"
+async function canviarAMusicaMenu() {
+    if (!audioIniciat) return;
+    try {
+        musicaJoc.pause();
+        musicaJoc.currentTime = 0;
+        await musicaMenu.play();
+    } catch (e) {
+        console.error("Error al reproduir menú:", e);
+    }
+}
+
+async function canviarAMusicaJoc() {
+    if (!audioIniciat) return;
+    try {
+        musicaMenu.pause();
+        musicaMenu.currentTime = 0;
+        await musicaJoc.play();
+    } catch (e) {
+        console.error("Error al reproduir joc:", e);
+    }
+}
+
+// Escolta qualsevol clic a la pantalla per activar l'àudio (restricció del navegador)
+window.addEventListener('click', () => {
+    if (!audioIniciat) {
+        audioIniciat = true;
+        console.log("Àudio desbloquejat correctament per l'usuari!");
+        canviarAMusicaMenu(); 
+    }
+}, { once: true });
     
 /**
  * ==========================================================================
@@ -1098,11 +1049,21 @@ let selectedSkins = JSON.parse(localStorage.getItem('selectedSkins')) || {};
 
 // --- SISTEMA D'INVENTARI I EQUIPAMENT D'ARMES (MÀXIM 10) ---
 let purchasedWeapons = JSON.parse(localStorage.getItem('purchasedWeapons')) || [];
-let equippedWeapons = JSON.parse(localStorage.getItem('equippedWeapons')) || []; 
+// Ens assegurem que la pistola (0) sempre estigui a la col·lecció de "comprades"
+if (!purchasedWeapons.includes(0)) purchasedWeapons.push(0);
 
-if (!localStorage.getItem('equippedWeapons')) {
-    equippedWeapons = purchasedWeapons.slice(0, 9);
+let equippedWeapons = JSON.parse(localStorage.getItem('equippedWeapons')); 
+if (!equippedWeapons) {
+    // Si és nou usuari li donem la pistola equipada per defecte
+    equippedWeapons = [0];
     localStorage.setItem('equippedWeapons', JSON.stringify(equippedWeapons));
+} else {
+    // Migració per usuaris antics que no tenien la pistola a l'array perquè era obligada
+    if (!localStorage.getItem('pistolMigrated')) {
+        if (!equippedWeapons.includes(0)) equippedWeapons.unshift(0);
+        localStorage.setItem('pistolMigrated', 'true');
+        localStorage.setItem('equippedWeapons', JSON.stringify(equippedWeapons));
+    }
 }
 
 // --- DADES EXTRA DE PROGRÉS I PERFIL ---
@@ -1130,7 +1091,7 @@ let bossBullets = [];
 let specialEntities = []; 
 
 let keys = {};
-let curWeapon = 0; 
+let curWeapon = null; 
 let curForm = 1; 
 let tempSelected = 1; 
 
@@ -1410,7 +1371,7 @@ function generateInventoryUI() {
     container.innerHTML = "";
     activeKeyMap = {};
     
-    let myWeapons = new Set([0, ...equippedWeapons]);
+    let myWeapons = new Set([...equippedWeapons]);
     let weaponsArray = Array.from(myWeapons).sort((a,b) => a-b);
     
     weaponsArray.forEach((wId, index) => {
@@ -1441,7 +1402,7 @@ function checkWeaponUnlocks() {
     for (let id in weapons) {
         if(id === "lastFired") continue;
         let w = weapons[id];
-        let isEquipped = equippedWeapons.includes(parseInt(id)) || id == 0;
+        let isEquipped = equippedWeapons.includes(parseInt(id));
         if (isEquipped && weapons.lastFired[id]) {
             let elapsed = Date.now() - weapons.lastFired[id];
             let pct = Math.max(0, 100 - (elapsed / w.rate * 100));
@@ -1562,7 +1523,7 @@ function startGame() {
     bullets = []; 
     bossBullets = []; 
     specialEntities = [];
-    curWeapon = 0; 
+    curWeapon = equippedWeapons.length > 0 ? equippedWeapons[0] : null; 
     
     weapons.lastFired = {}; 
     sunActiveUntil = 0;
@@ -1573,6 +1534,7 @@ function startGame() {
     
     gameRunning = true; 
     requestAnimationFrame(draw);
+    canviarAMusicaJoc();
 }
 
 function draw() {
@@ -1749,28 +1711,30 @@ function draw() {
     }
     
     if (isMouseDown && (!player.paralyzedUntil || now >= player.paralyzedUntil)) {
-        let w = weapons[curWeapon]; 
-        let lastF = weapons.lastFired[curWeapon] || 0;
-        
-        if ((curWeapon == 0 || equippedWeapons.includes(parseInt(curWeapon))) && now - lastF > w.rate) {
-            let angle = Math.atan2(mouseY-player.y, mouseX-player.x);
+        if (curWeapon !== null) {
+            let w = weapons[curWeapon]; 
+            let lastF = weapons.lastFired[curWeapon] || 0;
             
-            if(w.type && w.type.startsWith('special_')) { 
-                spawnSpecialWeapon(w.type, w, angle, now); 
-            } else { 
-                bullets.push({ 
-                    x: player.x, 
-                    y: player.y, 
-                    vx: w.speed===0 ? 0 : Math.cos(angle)*w.speed, 
-                    vy: w.speed===0 ? 0 : Math.sin(angle)*w.speed, 
-                    emoji: w.emoji, 
-                    dmg: w.dmg, 
-                    weaponId: curWeapon, 
-                    creationTime: now, 
-                    rebounces: 0 
-                }); 
+            if (equippedWeapons.includes(parseInt(curWeapon)) && now - lastF > w.rate) {
+                let angle = Math.atan2(mouseY-player.y, mouseX-player.x);
+                
+                if(w.type && w.type.startsWith('special_')) { 
+                    spawnSpecialWeapon(w.type, w, angle, now); 
+                } else { 
+                    bullets.push({ 
+                        x: player.x, 
+                        y: player.y, 
+                        vx: w.speed===0 ? 0 : Math.cos(angle)*w.speed, 
+                        vy: w.speed===0 ? 0 : Math.sin(angle)*w.speed, 
+                        emoji: w.emoji, 
+                        dmg: w.dmg, 
+                        weaponId: curWeapon, 
+                        creationTime: now, 
+                        rebounces: 0 
+                    }); 
+                }
+                weapons.lastFired[curWeapon] = now;
             }
-            weapons.lastFired[curWeapon] = now;
         }
     }
     
@@ -2049,7 +2013,7 @@ window.addEventListener('keydown', e => {
     if(activeKeyMap[k] !== undefined) {
         let reqW = activeKeyMap[k];
         let slot = document.getElementById('w' + reqW);
-        if (slot && (reqW == 0 || equippedWeapons.includes(parseInt(reqW)))) {
+        if (slot && equippedWeapons.includes(parseInt(reqW))) {
             document.querySelectorAll('.slot').forEach(s => s.classList.remove('active'));
             curWeapon = reqW; slot.classList.add('active');
             
@@ -2093,8 +2057,11 @@ function openMenu(menuId) {
 
 function openAvatarMenu() {
     openMenu('menu-avatar');
-    let gridContainer = document.getElementById('avatar-grid-container'); 
-    gridContainer.innerHTML = "";
+    let gridUnlocked = document.getElementById('avatar-grid-unlocked'); 
+    let gridLocked = document.getElementById('avatar-grid-locked'); 
+    
+    gridUnlocked.innerHTML = "";
+    gridLocked.innerHTML = "";
     
     for(let id in avatars) {
         let av = avatars[id]; 
@@ -2118,7 +2085,12 @@ function openAvatarMenu() {
         `;
         
         card.onclick = () => { tempSelected = id; updateAvatarPreview(); }; 
-        gridContainer.appendChild(card);
+        
+        if(isUnlocked) {
+            gridUnlocked.appendChild(card);
+        } else {
+            gridLocked.appendChild(card);
+        }
     }
     updateAvatarPreview();
 }
@@ -2143,9 +2115,9 @@ function updateAvatarPreview() {
     document.getElementById('avatar-speed').innerText = "V. Moviment base: " + av.speed; 
     document.getElementById('avatar-hp').innerText = "Capacitat Vital Màxima: " + activeSkin.hp;
     
-    let myWeapons = new Set([0, ...equippedWeapons]);
+    let myWeapons = new Set([...equippedWeapons]);
     let wepNames = Array.from(myWeapons).map(id => weapons[id]?.name).filter(n => n).join(', ');
-    document.getElementById('avatar-weapons').innerText = "L'Arsenal a transportar: " + wepNames;
+    document.getElementById('avatar-weapons').innerText = "L'Arsenal a transportar: " + (wepNames || "Cap arma equipada");
     
     let btnAction = document.getElementById('action-btn');
     if (isUnlocked) {
@@ -2348,23 +2320,24 @@ function renderShop() {
     container.innerHTML = "";
     
     // Comptador (Arma bàsica 0 s'inclou visualment com una obligada)
-    let totalEquipped = equippedWeapons.length + 0;
+    let totalEquipped = equippedWeapons.length;
     document.getElementById('equipped-counter').innerText = `Armeria Central Equipada: ${totalEquipped} de 10 armaments`;
 
     // Recorrem tot l'objecte original de configuració "weapons"
     Object.keys(weapons).forEach(wId => {
-        // Ignorem la pistola bàsica gratuïta (0) i propietats auxiliars internes ('lastFired')
-        if(wId === "0" || wId === "lastFired") return; 
+        // Ignorem propietats auxiliars internes ('lastFired')
+        if(wId === "lastFired") return; 
         
         let idInt = parseInt(wId);
         let w = weapons[wId]; 
         
         // Verifiquem els estats a la base de dades persistida de l'usuari
+        // La pistola (0) ara s'ha introduït per defecte a purchasedWeapons
         let isOwned = purchasedWeapons.includes(idInt); 
         let isEquipped = equippedWeapons.includes(idInt);
         
-        // Fòrmula d'inflació dinàmica de preus base en base al seu ID d'arma
-        let fakeCost = (idInt * 15) + 50;
+        // Fòrmula d'inflació dinàmica de preus base en base al seu ID d'arma (la 0 val zero i ja es té)
+        let fakeCost = idInt === 0 ? 0 : (idInt * 15) + 50;
         let canAfford = xp >= fakeCost;
         
         // Creem l'embolcall (card) per a la nostra interfície
@@ -2447,11 +2420,15 @@ function renderShop() {
 
 function toggleEquipWeapon(wId) {
     if (equippedWeapons.includes(wId)) {
+        if (equippedWeapons.length <= 1) {
+            showFloatingMessage("Has de portar com a mínim 1 arma al combat!", "red", "⚠️");
+            return;
+        }
         equippedWeapons = equippedWeapons.filter(id => id !== wId);
         localStorage.setItem('equippedWeapons', JSON.stringify(equippedWeapons));
         renderShop();
     } else {
-        if (equippedWeapons.length + 1 >= 10) {
+        if (equippedWeapons.length >= 10) {
             showFloatingMessage("PES EXCESSIU ASSOLIT! (Max 10 per partida)", "red", "⚠️");
         } else {
             equippedWeapons.push(wId);
@@ -2466,7 +2443,7 @@ function buyWeapon(wId, cost) {
         xp -= cost; 
         purchasedWeapons.push(parseInt(wId)); 
         
-        if (equippedWeapons.length + 1 < 10) {
+        if (equippedWeapons.length < 10) {
             equippedWeapons.push(parseInt(wId));
         }
 
@@ -2617,7 +2594,7 @@ function grantRandomWeapon(poolIds, compensCopes, compensXP) {
         };
     } else {
         purchasedWeapons.push(randId);
-        if (equippedWeapons.length + 1 < 10) equippedWeapons.push(randId);
+        if (equippedWeapons.length < 10) equippedWeapons.push(randId);
         
         localStorage.setItem('purchasedWeapons', JSON.stringify(purchasedWeapons));
         localStorage.setItem('equippedWeapons', JSON.stringify(equippedWeapons));
@@ -2716,7 +2693,7 @@ function redeemCode() {
     else if (codeInput === "oiia") { 
         if (!purchasedWeapons.includes(7)) { 
             purchasedWeapons.push(7); 
-            if(equippedWeapons.length + 1 < 10) equippedWeapons.push(7); 
+            if(equippedWeapons.length < 10) equippedWeapons.push(7); 
             localStorage.setItem('purchasedWeapons', JSON.stringify(purchasedWeapons)); 
             localStorage.setItem('equippedWeapons', JSON.stringify(equippedWeapons)); 
         } 
@@ -2725,7 +2702,7 @@ function redeemCode() {
     else if (codeInput === "gorilondo") { 
         if (!purchasedWeapons.includes(11)) { 
             purchasedWeapons.push(11); 
-            if(equippedWeapons.length + 1 < 10) equippedWeapons.push(11); 
+            if(equippedWeapons.length < 10) equippedWeapons.push(11); 
             localStorage.setItem('purchasedWeapons', JSON.stringify(purchasedWeapons)); 
             localStorage.setItem('equippedWeapons', JSON.stringify(equippedWeapons)); 
         } 
@@ -2774,6 +2751,7 @@ function goHome() {
     document.getElementById('centes-display').style.display = 'block';
     
     updateUI();
+    canviarAMusicaMenu();
 }
 
 function skipAnimation() { 
