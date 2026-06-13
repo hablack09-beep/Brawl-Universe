@@ -65,6 +65,7 @@
         @keyframes luckyShake { 0% { transform: rotate(0deg) scale(1); filter: brightness(1); } 25% { transform: rotate(15deg) scale(1.1); filter: brightness(1.2); } 50% { transform: rotate(-15deg) scale(1.1); filter: brightness(1.4); } 75% { transform: rotate(15deg) scale(1.1); filter: brightness(1.2); } 100% { transform: rotate(0deg) scale(1); filter: brightness(1); } }
         @keyframes luckyPop { 0% { transform: scale(0.1); opacity: 0; } 60% { transform: scale(1.4); opacity: 1; } 80% { transform: scale(0.9); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
         @keyframes glowBorder { 0% { border-color: #333; } 50% { border-color: var(--accent-gold); } 100% { border-color: #333; } }
+        @keyframes rouletteSpin { 0% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.1) rotate(10deg); filter: brightness(1.5); } 100% { transform: scale(1) rotate(0deg); } }
 
         /* ==========================================================================
            3. BOTONS DE LA INTERFÍCIE I SISTEMA DE NAVEGACIÓ
@@ -92,11 +93,10 @@
         #menu-profile { background: radial-gradient(circle, #202020 0%, #000 100%); display: none; }
         #page-codes   { background: radial-gradient(circle, #2a004d 0%, #000 100%); display: none; }
         #page-lucky   { background: radial-gradient(circle, #1a1a1a 0%, #000 100%); display: none; }
-        #page-maps    { background: radial-gradient(circle, #002b11 0%, #000 100%); display: none; } 
         #page-achievements { 
             background: radial-gradient(circle, #4d3300 0%, #000 100%); 
             display: none; 
-            justify-content: flex-start !important; /* L'alineem dalt perquè els fills s'ajustin */
+            justify-content: flex-start !important;
             padding-top: 100px;
             box-sizing: border-box;
         } 
@@ -108,10 +108,10 @@
         #page-levels { 
             overflow-y: auto; 
             padding-top: 150px; 
-            padding-bottom: 250px; /* MOLT ESPAI EXTRA PER PODER BAIXAR DEL TOT I RECLAMAR EL NIVELL 100 */
+            padding-bottom: 250px;
             box-sizing: border-box; 
             justify-content: flex-start !important; 
-            height: 100%; /* Obliguem a que faci 100% de la pantalla */
+            height: 100%;
         }
         .alfombra { 
             width: 90%; 
@@ -123,7 +123,7 @@
             flex-direction: column; 
             gap: 15px; 
             border: 4px solid #333; 
-            margin-bottom: 200px; /* MARGE EXTRA FINAL */
+            margin-bottom: 200px;
         }
         .level-card { background: #222; border-radius: 20px; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border: 2px solid #444; transition: 0.2s; }
         .level-card:hover { transform: translateX(10px); }
@@ -186,14 +186,14 @@
         #achievements-container {
             display: flex;
             flex-direction: row;
-            align-items: stretch; /* Canviat a stretch perquè les columnes tinguin alçada 100% */
+            align-items: stretch;
             justify-content: center;
             padding-top: 20px;
             width: 95%;
             max-width: 1600px;
             margin: 0 auto;
             gap: 40px;
-            height: calc(100vh - 280px); /* Alçada fixa calculada perquè quedi dins la pantalla */
+            height: calc(100vh - 280px);
         }
 
         .achievements-column {
@@ -201,11 +201,11 @@
             padding: 30px;
             background: rgba(0,0,0,0.4);
             border-radius: 20px;
-            overflow-y: auto; /* Ara s'activa correctament l'scroll aquí dins */
+            overflow-y: auto;
             border: 2px solid rgba(255,215,0,0.2);
             box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
             box-sizing: border-box; 
-            height: 100%; /* Fixem l'alçada perquè l'overflow funcioni */
+            height: 100%;
         }
 
         .achievements-column h2 {
@@ -214,7 +214,7 @@
             padding-bottom: 10px;
             border-bottom: 2px solid;
             margin-bottom: 20px;
-            position: sticky; /* Fa que el títol quedi enganxat a dalt al fer scroll */
+            position: sticky;
             top: -30px;
             background: rgba(0,0,0,0.9);
             z-index: 10;
@@ -299,14 +299,16 @@
         .cooldown-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(255, 0, 0, 0.7); height: 0%; transition: height 0.1s linear; border-radius: 8px; }
         .key-hint { position: absolute; top: -25px; color: #ccc; font-size: 14px; font-family: monospace; font-weight: bold; text-shadow: 2px 2px 2px black; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; }
 
-        /* AVATARS I ROULETTE */
+        /* AVATARS I ROULETTE DOBLE */
         .avatar-card { background: rgba(0,0,0,0.6); border: 3px solid #555; border-radius: 12px; cursor: pointer; padding: 15px 10px; text-align: center; transition: 0.2s; }
         .avatar-card:hover { transform: scale(1.05); border-color: #aaa; }
         .avatar-card.selected { border-color: #00ffff; box-shadow: 0 0 15px #00ffff; }
         .avatar-card img { width: 90px; height: 90px; object-fit: contain; }
         .skin-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; margin-bottom: 10px; }
         .skin-row img { width: 50px; height: 50px; object-fit: contain; }
-        #roulette-display { font-size:120px; border:10px solid gold; border-radius:50%; width:180px; height:180px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); }
+        
+        .roulette-box { font-size:120px; border-radius:50%; width:180px; height:180px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.4); transition: 0.1s; }
+        .roulette-spinning { animation: rouletteSpin 0.3s infinite linear; }
         
         #mission-tracker { position: absolute; bottom: 130px; left: 30px; background: rgba(0,0,0,0.9); border: 3px solid #ff00ff; padding: 20px; border-radius: 15px; display: none; z-index: 1000; box-shadow: 0 0 20px rgba(255,0,255,0.4);}
         #weapon-info { position: absolute; top: 120px; left: 50%; transform: translateX(-50%); font-size: 22px; color: var(--accent-gold); text-shadow: 2px 2px 4px black; font-weight: bold; background: rgba(0,0,0,0.6); padding: 10px 25px; border-radius: 15px; border: 2px solid gold;}
@@ -320,7 +322,7 @@
     <div id="profile-btn" class="menu-top-btn" onclick="openProfile()">👤 PERFIL</div>
     
     <div id="top-nav-right">
-        <div id="maps-btn" class="menu-top-btn" style="background: #228b22; border-color: white;" onclick="openMaps()">🗺️ MAPES</div>
+        <!-- El botó de MAPES s'ha eliminat a petició del dissenyador -->
         <div id="lucky-btn" class="menu-top-btn" style="background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3); border-color: white;" onclick="openLucky()">🎲 LUCKY BLOCKS</div>
         <div id="shop-btn" class="menu-top-btn" style="background: #ff4500; border-color: white;" onclick="openShop()">🛒 COMPRAR ARMES</div>
         <div id="reward-btn" class="menu-top-btn" style="background: #ff00ff; border-color: white;" onclick="openRewards()">🎁 MISSIONS</div>
@@ -399,12 +401,6 @@
         <h1 style="color:#ff4500; margin-bottom: 10px; font-size: 60px; text-shadow: 0 0 30px orange;">L'ARMERIA</h1>
         <div id="equipped-counter" style="color: #00ffff; font-size: 26px; margin-bottom: 30px; font-weight: bold; background: rgba(0,0,0,0.6); padding: 15px 30px; border-radius: 15px; border: 3px solid #00ffff;">Armes Equipades: 1 / 10</div>
         <div id="shop-grid-container"></div>
-    </div>
-
-    <!-- PÀGINA: MAPES -->
-    <div id="page-maps" class="menu" style="display:none; flex-direction:column; justify-content:flex-start; padding-top:100px; overflow-y:auto;">
-        <h1 style="color:#32ff32; margin-bottom: 20px; font-size: 60px; text-shadow: 0 0 30px #32ff32;">SELECTOR DE MAPES</h1>
-        <div id="maps-grid" style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; max-width: 1200px; padding-bottom: 50px;"></div>
     </div>
 
     <!-- PÀGINA: LOGROS -->
@@ -487,12 +483,27 @@
         </div>
     </div>
 
-    <!-- RULETA BOSS -->
+    <!-- RULETA DOBLE: BOSS I MAPA -->
     <div id="menu-boss" class="menu" style="display:none; background: radial-gradient(circle, #330000 0%, #000 100%);">
-        <h2 style="color: white; font-size: 40px; margin-bottom: 50px; text-shadow: 0 0 20px red;">S'APROPA UN ENEMIC PERILLÓS...</h2>
-        <div id="roulette-display" style="box-shadow: 0 0 50px gold; transition: 0.1s;">❓</div>
-        <div id="boss-random-name" style="font-size:50px; color:gold; margin-top:40px; text-shadow: 0 0 20px gold; font-weight: bold;">???</div>
-        <div id="spin-btn" class="world-btn" style="background: #ff00ff; border-color: white; margin-top: 60px;" onclick="spinRoulette()">GIRAR LA RULETA</div>
+        <h2 style="color: white; font-size: 40px; margin-bottom: 50px; text-shadow: 0 0 20px red;">PREPARANT LA BATALLA...</h2>
+        
+        <div style="display: flex; gap: 100px; justify-content: center; align-items: center; width: 100%; max-width: 1000px;">
+            <!-- RULETA DEL BOSS -->
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <h3 style="color: red; font-size: 24px; text-shadow: 0 0 10px red; margin-bottom: 15px;">ENEMIC DESTINAT</h3>
+                <div id="roulette-display-boss" class="roulette-box" style="border:10px solid red; box-shadow: 0 0 50px red;">❓</div>
+                <div id="boss-random-name" style="font-size:40px; color:gold; margin-top:30px; text-shadow: 0 0 20px gold; font-weight: bold;">???</div>
+            </div>
+
+            <!-- RULETA DEL MAPA -->
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <h3 style="color: #32ff32; font-size: 24px; text-shadow: 0 0 10px #32ff32; margin-bottom: 15px;">UBICACIÓ</h3>
+                <div id="roulette-display-map" class="roulette-box" style="border:10px solid #32ff32; box-shadow: 0 0 50px #32ff32;">🌍</div>
+                <div id="map-random-name" style="font-size:40px; color:#32ff32; margin-top:30px; text-shadow: 0 0 20px #32ff32; font-weight: bold;">???</div>
+            </div>
+        </div>
+
+        <div id="spin-btn" class="world-btn" style="background: #ff00ff; border-color: white; margin-top: 60px;" onclick="spinRoulette()">GIRAR RULETES</div>
     </div>
 
     <!-- UI DEL CANVAS (IN-GAME) -->
@@ -511,9 +522,12 @@
     <!-- CANVAS PRINCIPAL -->
     <canvas id="gameCanvas"></canvas>
 
-    <!-- ANIMACIÓ FINAL -->
+    <!-- ANIMACIÓ FINAL ANIMADA (L'ARXIU .GIF DEMANAT) -->
     <div id="endgame-animation" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 3000; background: rgba(0,0,0,0.98); flex-direction: column; justify-content: center; align-items: center;">
-        <h1 style="color: gold; font-size: 60px; text-shadow: 0 0 20px gold;">BATALLA ACABADA, AGAFA LES RECOMPENSES I FES UNA NOVA PARTIDA PER UNA NOVA EXPERIENCIA AMB UN NOU JEFE</h1>
+        
+        <!-- Implementació de la imatge animació.gif segons la petició -->
+        <img src="animació.gif" alt="Animació Final de Partida" style="max-width: 80%; max-height: 60vh; border: 5px solid gold; border-radius: 20px; box-shadow: 0 0 50px gold; margin-bottom: 30px;">
+        
         <button class="world-btn" onclick="skipAnimation()" style="background: #ff00ff; border: 4px solid white; box-shadow: 0 0 30px #ff00ff; margin-top: 30px; font-size: 26px;">⬅ TORNAR AL MENÚ</button>
     </div>
 
@@ -730,32 +744,322 @@ function claimLevel(id) {
  * ==========================================================================
  */
 const avatars = {
-    1: { name: "FerranTrufa", speed: 4, cost: 0, desc: "El gos fundacional del joc. Lenta però segura.", skins: [ { id: 0, name: "Bàsic", imgSrc: "skinferrantrufa.png", hp: 100, costCopes: 0, costXp: 0 }, { id: 1, name: "Mariachi", imgSrc: "ferrantrufamexico.png", hp: 150, costCopes: 100, costXp: 20 } ] },
-    2: { name: "Trufa", speed: 6, cost: 50, desc: "Brawler equilibrat. Un company ideal per mapes oberts.", skins: [ { id: 0, name: "Bàsic", imgSrc: "skintrufa.png", hp: 100, costCopes: 0, costXp: 0 }, { id: 1, name: "Mariachi", imgSrc: "trufamexico.png", hp: 130, costCopes: 150, costXp: 30 } ] },
-    3: { name: "ProGodo", speed: 8, cost: 100, desc: "Avançat i pro. Una autèntica llegenda vivent.", skins: [ { id: 0, name: "Bàsic", imgSrc: "skingodo.png", hp: 110, costCopes: 0, costXp: 0 }, { id: 1, name: "My logo", imgSrc: "godo2.png", hp: 250, costCopes: 1000, costXp: 500 }, { id: 1, name: "Verterano", imgSrc: "godo3.png", hp: 350, costCopes: 1500, costXp: 750 } ] },
-    4: { name: "ElPepe", speed: 12, cost: 200, desc: "Molt àgil i ràpid per esquivar projectils pesats.", skins: [ { id: 0, name: "Bàsic", imgSrc: "skinelpepe.png", hp: 90, costCopes: 0, costXp: 0 }, { id: 1, name: "Elpepedios", imgSrc: "elpepedios.png", hp: 140, costCopes: 250, costXp: 50 } ] },
-    6: { name: "Ferran", speed: 12, cost: 300, desc: "Explorador que gaudeix dels llacs i mars de l'arena.", skins: [ { id: 0, name: "Bàsic", imgSrc: "skinferran.png", hp: 100, costCopes: 0, costXp: 0 }, { id: 1, name: "Mariachi", imgSrc: "ferranmexico.png", hp: 150, costCopes: 350, costXp: 70 } ] },
-    7: { name: "Hablack09", speed: 12, cost: 400, desc: "Depredador silenciós de la foscor de la nit.", skins: [ { id: 0, name: "Bàsic", imgSrc: "skinmarc.png", hp: 120, costCopes: 0, costXp: 0 }, { id: 1, name: "Hablack Omega", imgSrc: "Skin Hablackmeca.png", hp: 180, costCopes: 400, costXp: 80 }, { id: 2, name: "Vtuber", imgSrc: "Skin Hablackvtuber.png", hp: 250, costCopes: 900, costXp: 200 } ] },
-    8: { name: "Adredvv", speed: 999, cost: 500, desc: "LLEGENDARI: Domina el tauler. recompenses!", skins: [ { id: 0, name: "Bàsic", imgSrc: "skinadria.png", hp: 200, costCopes: 0, costXp: 0 }, { id: 1, name: "Adribinary", imgSrc: "adribinary.png", hp: 300, costCopes: 1500, costXp: 300 }, { id: 2, name: "La millor skin del joc", imgSrc: "adria3.png", hp: 1, costCopes: 20, costXp: 100 } ] },
-    9: { name: "Sers25", speed: 12, cost: 600, desc: "Tanc robust. Un dur de pelar a distàncies curtes.", skins: [ { id: 0, name: "Bàsic", imgSrc: "skinsers.png", hp: 150, costCopes: 0, costXp: 0 }, { id: 1, name: "Sers meca", imgSrc: "Skin Sersmeca.png", hp: 220, costCopes: 1000, costXp: 500 }, { id: 2, name: "Déu Suprem", imgSrc: "serspro.png", hp: 300, costCopes: 1500, costXp: 1250 } ] },
-    10: { name: "AVAP", speed: 12, cost: 700, desc: "Rei del Mar de l'Antiguitat.", skins: [ { id: 0, name: "Bàsic", imgSrc: "skinavap.png", hp: 220, costCopes: 0, costXp: 0 } ] },
-    11: { name: "BlackGoku", speed: 12, cost: 800, desc: "Domini aeri excepcional.", skins: [ { id: 0, name: "Bàsic", imgSrc: "blackgoku.png", hp: 110, costCopes: 0, costXp: 0 }, { id: 1, name: "goku4", imgSrc: "goku4.webp", hp: 170, costCopes: 450, costXp: 90 }, { id: 2, name: "Gokultra", imgSrc: "gokultra.png", hp: 240, costCopes: 1000, costXp: 250 } ] },
-    12: { name: "AyuMeReck", speed: 12, cost: 900, desc: "Mestre de les esmunyides constants.", skins: [ { id: 0, name: "Bàsic", imgSrc: "skinayu.png", hp: 100, costCopes: 0, costXp: 0 } ] },
-    13: { name: "Structito", speed: 12, cost: 1000, desc: "LLEGENDARI AVATAR", skins: [ { id: 0, name: "Bàsic", imgSrc: "skinstructito.png", hp: 250, costCopes: 0, costXp: 0 }, { id: 1, name: "Structito Ninja", imgSrc: "skinstructitoninja.png", hp: 400, costCopes: 3000, costXp: 600 } ] },
-    14: { name: "Tomatina", speed: 12, cost: 1200, desc: "Atac explosiu amb +20% recompenses! (Multiplicador x1.2)", multiplier: 1.2, skins: [ { id: 0, name: "Bàsic", imgSrc: "skintomatina.png", hp: 120, costCopes: 0, costXp: 0 }, { id: 1, name: "Mariachi", imgSrc: "tomatinamexico.png", hp: 180, costCopes: 600, costXp: 120 } ] },
-    15: { name: "GatoPitufo", speed: 12, cost: 1400, desc: "Mite de TikTok! Farmea com un boig amb multiplicador x1.4", multiplier: 1.4, skins: [ { id: 0, name: "Bàsic", imgSrc: "gatopitufo.png", hp: 150, costCopes: 0, costXp: 0 }, { id: 1, name: "Gat Màgic", imgSrc: "catpitufopro.png", hp: 250, costCopes: 4500, costXp: 800 } ] },
-    16: { name: "Catbanana", speed: 12, cost: 1600, desc: "El plàtan felí indestructible. Multiplicador d'ajuda x1.6", multiplier: 1.6, skins: [ { id: 0, name: "Bàsic", imgSrc: "catbanana.png", hp: 200, costCopes: 0, costXp: 0 }, { id: 1, name: "Pro", imgSrc: "catbananapro.png", hp: 350, costCopes: 6000, costXp: 1000 } ] },  
-    17: { name: "Luffy", speed: 12, cost: 1800, desc: "El futur rei dels pirates ha arribat. Multiplicador elèctric x1.8", multiplier: 1.8, skins: [ { id: 0, name: "Bàsic", imgSrc: "luffy.webp", hp: 400, costCopes: 0, costXp: 0 }, { id: 1, name: "Luffy Gear 5", imgSrc: "luffy5.webp", hp: 550, costCopes: 6000, costXp: 1000 }, { id: 2, name: "Ruffy", imgSrc: "luffy pro max.png", hp: 800, costCopes: 12000, costXp: 4000 } ] },
-    18: { name: "Huguito", speed: 12, cost: 2000, desc: "A pugar copes al Brawl. Multiplicador elèctric x2 ", multiplier: 2, skins: [ { id: 0, name: "Bàsic", imgSrc: "Hugito.png", hp: 400, costCopes: 0, costXp: 0 }, { id: 1, name: "Huguito FNAF", imgSrc: "hugo3.png", hp: 450, costCopes: 6000, costXp: 1000 }, { id: 1, name: "Huguito Dragon Ball", imgSrc: "hugo2.png", hp: 600, costCopes: 9000, costXp: 1000 } ] },
-    19: { name: "Tete11", speed: 12, cost: 2200, desc: "Anem a buscar esparrecs. Multiplicador elèctric x2.2", multiplier: 2.2, skins: [ { id: 0, name: "Bàsic", imgSrc: "tete11.png", hp: 400, costCopes: 0, costXp: 0 } ] },    
-    20: { name: "Noah", speed: 12, cost: 2400, desc: "Esa sarten me pego la cabeza. Multiplicador elèctric x2.4", multiplier: 2.4, skins: [ { id: 0, name: "Bàsic", imgSrc: "noah.png", hp: 400, costCopes: 0, costXp: 0 }, { id: 1, name: "Noah pixel", imgSrc: "noah1.png", hp: 350, costCopes: 6000, costXp: 1000 }, { id: 2, name: "Noah croco", imgSrc: "noah2.png", hp: 550, costCopes: 10000, costXp: 3000 } ] },
-    21: { name: "Adriluski999", speed: 12, cost: 2600, desc: "Antes estava calvo de hacer tantas partidas. Multiplicador elèctric x2.6", multiplier: 2.6, skins: [ { id: 0, name: "Bàsic", imgSrc: "adriluski.png", hp: 400, costCopes: 0, costXp: 0 }, { id: 1, name: "Antibales", imgSrc: "adri2.png", hp: 450, costCopes: 6000, costXp: 1000 }, { id: 2, name: "Gamer", imgSrc: "adri3.png", hp: 600, costCopes: 9000, costXp: 1000 } ] },
-    22: { name: "Kael", speed: 12, cost: 2800, desc: "El Déu dels animals, multiplicador x2.8!", multiplier: 2.8, skins: [ { id: 0, name: "Bàsic", imgSrc: "kael.png", hp: 200, costCopes: 0, costXp: 0 }, { id: 1, name: "Pro", imgSrc: "kael motorista.png", hp: 350, costCopes: 6000, costXp: 1000 }, { id: 2, name: "Kael futurista", imgSrc: "kael pro max.png", hp: 550, costCopes: 10000, costXp: 3000 } ] },
-    23: { name: "Chipi Chipi", speed: 12, cost: 3000, desc: "El Déu Felí: Chipi chipi chapa chapa. Guanya x3 més!", multiplier: 3, skins: [ { id: 0, name: "Bàsic", imgSrc: "chipichipi.png", hp: 200, costCopes: 0, costXp: 0 }, { id: 1, name: "Mariachi", imgSrc: "chipimexico.png", hp: 350, costCopes: 6000, costXp: 1000 }, { id: 2, name: "Déu Suprem", imgSrc: "chipimexico.png", hp: 550, costCopes: 10000, costXp: 3000 } ] },
-    24: { name: "Augusto", speed: 12, cost: 3200, desc: "El Déu que se diu augusto, multiplicador x3.2", multiplier: 3.2, skins: [ { id: 0, name: "Bàsic", imgSrc: "agusto.png", hp: 200, costCopes: 0, costXp: 0 }, { id: 1, name: "profesor", imgSrc: "agustoo.png", hp: 350, costCopes: 6000, costXp: 1000 } ] },
-    25: { name: "Program", speed: 12, cost: 3400, desc: "El Déu que se diu program, multiplicador x3.4", multiplier: 3.4, skins: [ { id: 0, name: "Bàsic", imgSrc: "mpp.png", hp: 200, costCopes: 0, costXp: 0 }, { id: 1, name: "Program pro", imgSrc: "mpp pro.png", hp: 350, costCopes: 6000, costXp: 1000 }, { id: 1, name: "Program pro", imgSrc: "mppp.png", hp: 600, costCopes: 9000, costXp: 1000 } ] },
-    26: { name: "Zynx", speed: 12, cost: 3600, desc: "El Déu que se diu Zynx, multiplicador x3.6", multiplier: 3.6, skins: [ { id: 0, name: "Zynx", imgSrc: "lynx.png", hp: 200, costCopes: 0, costXp: 0 }, { id: 1, name: "Payaso", imgSrc: "zynx2.png", hp: 450, costCopes: 6000, costXp: 1000 }, { id: 2, name: "Guitarrero", imgSrc: "zynx3.png", hp: 600, costCopes: 9000, costXp: 1000 } ] }
+    1: { 
+        name: "FerranTrufa", 
+        speed: 4, 
+        cost: 0, 
+        desc: "El gos fundacional del joc. Lenta però segura.", 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "skinferrantrufa.png", hp: 100, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Mariachi", imgSrc: "ferrantrufamexico.png", hp: 150, costCopes: 100, costXp: 20 },
+            { id: 2, name: "Chil", imgSrc: "trufarran.png", hp: 350, costCopes: 1500, costXp: 750 }
+        ] 
+    },
+    2: { 
+        name: "Trufa", 
+        speed: 6, 
+        cost: 50, 
+        desc: "Brawler equilibrat. Un company ideal per mapes oberts.", 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "skintrufa.png", hp: 100, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Mariachi", imgSrc: "trufamexico.png", hp: 130, costCopes: 150, costXp: 30 },
+            { id: 2, name: "DogCat", imgSrc: "GatGos.png", hp: 130, costCopes: 150, costXp: 30 }
+        ] 
+    },
+    3: { 
+        name: "ProGodo", 
+        speed: 8, 
+        cost: 100, 
+        desc: "Avançat i pro. Una autèntica llegenda vivent.", 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "skingodo.png", hp: 110, costCopes: 0, costXp: 0 },
+            { id: 1, name: "My logo", imgSrc: "godo2.png", hp: 250, costCopes: 1000, costXp: 500 },
+            { id: 2, name: "Verterano", imgSrc: "godo3.png", hp: 350, costCopes: 1500, costXp: 750 }
+        ] 
+    },
+    4: { 
+        name: "ElPepe", 
+        speed: 12, 
+        cost: 200, 
+        desc: "Molt àgil i ràpid per esquivar projectils pesats.", 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "skinelpepe.png", hp: 90, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Elpepedios", imgSrc: "elpepedios.png", hp: 140, costCopes: 250, costXp: 50 }
+        ] 
+    },
+    6: { 
+        name: "Ferran", 
+        speed: 12, 
+        cost: 300, 
+        desc: "Explorador que gaudeix dels llacs i mars de l'arena.", 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "skinferran.png", hp: 100, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Mariachi", imgSrc: "ferranmexico.png", hp: 150, costCopes: 350, costXp: 70 },
+            { id: 2, name: "Batpro", imgSrc: "i.png", hp: 150, costCopes: 350, costXp: 70 } // Correspost a "i.png" de la imatge
+        ] 
+    },
+    7: { 
+        name: "Hablack09", 
+        speed: 12, 
+        cost: 400, 
+        desc: "Depredador silenciós de la foscor de la nit.", 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "skinmarc.png", hp: 120, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Hablack Omega", imgSrc: "Skin Hablackmeca.png", hp: 180, costCopes: 400, costXp: 80 },
+            { id: 2, name: "Vtuber", imgSrc: "Skin Hablackvtuber.png", hp: 250, costCopes: 900, costXp: 200 }
+        ] 
+    },
+    8: { 
+        name: "Adredvv", 
+        speed: 999, 
+        cost: 500, 
+        desc: "LLEGENDARI: Domina el tauler. recompenses!", 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "skinadria.png", hp: 200, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Adribinary", imgSrc: "adribinary.png", hp: 300, costCopes: 1500, costXp: 300 },
+            { id: 2, name: "La millor skin del joc", imgSrc: "adria3.png", hp: 1, costCopes: 20, costXp: 100 } // S'ha verificat "adria3.png" a la imatge
+        ] 
+    },
+    9: { 
+        name: "Sers25", 
+        speed: 12, 
+        cost: 600, 
+        desc: "Tanc robust. Un dur de pelar a distàncies curtes.", 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "skinsers.png", hp: 150, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Sers meca", imgSrc: "Skin Sersmeca.png", hp: 220, costCopes: 1000, costXp: 500 },
+            { id: 2, name: "Déu Suprem", imgSrc: "serspro.png", hp: 300, costCopes: 1500, costXp: 1250 }
+        ] 
+    },
+    10: { 
+        name: "AVAP", 
+        speed: 12, 
+        cost: 700, 
+        desc: "Rei del Mar de l'Antiguitat.", 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "skinavap.png", hp: 220, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Cocacola", imgSrc: "CC.png", hp: 220, costCopes: 0, costXp: 0 }, // S'ha verificat "CC.png" a la imatge
+            { id: 2, name: "Cofee", imgSrc: "CA.png", hp: 220, costCopes: 0, costXp: 0 } // "CA.png" es troba a la imatge
+        ] 
+    },
+    11: { 
+        name: "BlackGoku", 
+        speed: 12, 
+        cost: 800, 
+        desc: "Domini aeri excepcional.", 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "blackgoku.png", hp: 110, costCopes: 0, costXp: 0 },
+            { id: 1, name: "goku4", imgSrc: "goku4.webp", hp: 170, costCopes: 450, costXp: 90 }, // Es recomana assegurar si la teva web utilitza .png o .webp, a la llista surt només el nom "goku4"
+            { id: 2, name: "Gokultra", imgSrc: "gokultra.png", hp: 240, costCopes: 1000, costXp: 250 }
+        ] 
+    },
+    12: { 
+        name: "AyuMeReck", 
+        speed: 12, 
+        cost: 900, 
+        desc: "Mestre de les esmunyides constants.", 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "skinayu.png", hp: 100, costCopes: 0, costXp: 0 }
+        ] 
+    },
+    13: { 
+        name: "Structito", 
+        speed: 12, 
+        cost: 1000, 
+        desc: "LLEGENDARI AVATAR", 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "skinstructito.png", hp: 250, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Structito Ninja", imgSrc: "skinstructitoninja.png", hp: 400, costCopes: 3000, costXp: 600 },
+            { id: 2, name: "Structitogod", imgSrc: "ola.png", hp: 400, costCopes: 3000, costXp: 600 } // Correspost a "ola.png" de la imatge
+        ] 
+    },
+    14: { 
+        name: "Tomatina", 
+        speed: 12, 
+        cost: 1200, 
+        desc: "Atac explosiu amb +20% recompenses! (Multiplicador x1.2)", 
+        multiplier: 1.2, 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "skintomatina.png", hp: 120, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Mariachi", imgSrc: "tomatinamexico.png", hp: 180, costCopes: 600, costXp: 120 }
+        ] 
+    },
+    15: { 
+        name: "GatoPitufo", 
+        speed: 12, 
+        cost: 1400, 
+        desc: "Mite de TikTok! Farmea com un boig amb multiplicador x1.4", 
+        multiplier: 1.4, 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "gatopitufo.png", hp: 150, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Gat Màgic", imgSrc: "catpitufopro.png", hp: 250, costCopes: 4500, costXp: 800 } // S'ha comprovat que a la foto és "catpitufopro.png"
+        ] 
+    },
+    16: { 
+        name: "Catbanana", 
+        speed: 12, 
+        cost: 1600, 
+        desc: "El plàtan felí indestructible. Multiplicador d'ajuda x1.6", 
+        multiplier: 1.6, 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "catbanana.png", hp: 200, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Pro", imgSrc: "catbananapro.png", hp: 350, costCopes: 6000, costXp: 1000 } // A la foto es veu "catbananapro" (tallat)
+        ] 
+    },   
+    17: { 
+        name: "Luffy", 
+        speed: 12, 
+        cost: 1800, 
+        desc: "El futur rei dels pirates ha arribat. Multiplicador elèctric x1.8", 
+        multiplier: 1.8, 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "luffy.png", hp: 400, costCopes: 0, costXp: 0 }, // S'ha canviat format general a .png segons les teves imatges
+            { id: 1, name: "Luffy Gear 5", imgSrc: "luffy5.png", hp: 550, costCopes: 6000, costXp: 1000 },
+            { id: 2, name: "Ruffy", imgSrc: "luffy pro max.png", hp: 800, costCopes: 12000, costXp: 4000 } // S'ha verificat "luffy pro max" a la imatge
+        ] 
+    },
+    18: { 
+        name: "Huguito", 
+        speed: 12, 
+        cost: 2000, 
+        desc: "A pugar copes al Brawl. Multiplicador elèctric x2 ", 
+        multiplier: 2, 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "Hugito.png", hp: 400, costCopes: 0, costXp: 0 }, // S'ha ajustat a "Hugito.png" amb una sola 'u' tal com surt escrit a la foto
+            { id: 1, name: "Huguito FNAF", imgSrc: "hugo3.png", hp: 450, costCopes: 6000, costXp: 1000 },
+            { id: 2, name: "Huguito Dragon Ball", imgSrc: "hugo2.png", hp: 600, costCopes: 9000, costXp: 1000 }
+        ] 
+    },
+    19: { 
+        name: "Tete11", 
+        speed: 12, 
+        cost: 2200, 
+        desc: "Anem a buscar esparrecs. Multiplicador elèctric x2.2", 
+        multiplier: 2.2, 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "tete11.png", hp: 400, costCopes: 0, costXp: 0 }
+        ] 
+    },    
+    20: { 
+        name: "Noah", 
+        speed: 12, 
+        cost: 2400, 
+        desc: "Esa sarten me pego la cabeza. Multiplicador elèctric x2.4", 
+        multiplier: 2.4, 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "noah.png", hp: 400, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Noah pixel", imgSrc: "noah1.png", hp: 350, costCopes: 6000, costXp: 1000 },
+            { id: 2, name: "Noah croco", imgSrc: "noah2.png", hp: 550, costCopes: 10000, costXp: 3000 }
+        ] 
+    },
+    21: { 
+        name: "Adriluski999", 
+        speed: 12, 
+        cost: 2600, 
+        desc: "Antes estava calvo de hacer tantas partidas. Multiplicador elèctric x2.6", 
+        multiplier: 2.6, 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "adriluski.png", hp: 400, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Antibales", imgSrc: "adri2.png", hp: 450, costCopes: 6000, costXp: 1000 },
+            { id: 2, name: "Gamer", imgSrc: "adri3.png", hp: 600, costCopes: 9000, costXp: 1000 }
+        ] 
+    },
+    22: { 
+        name: "Kael", 
+        speed: 12, 
+        cost: 2800, 
+        desc: "El Déu dels animals, multiplicador x2.8!", 
+        multiplier: 2.8, 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "kael.png", hp: 200, costCopes: 0, costXp: 0 },
+            { id: 1, name: "Pro", imgSrc: "kael pro.png", hp: 350, costCopes: 6000, costXp: 1000 }, // S'ha corregit de "kael motorista" a "kael pro.png" segons la foto
+            { id: 2, name: "Kael futurista", imgSrc: "kael pro max.png", hp: 550, costCopes: 10000, costXp: 3000 } // S'ha corregit a "kael pro max"
+        ] 
+    },
+    23: { 
+        name: "Chipi Chipi", 
+        speed: 12, 
+        cost: 3000, 
+        desc: "El Déu Felí: Chipi chipi chapa chapa. Guanya x3 més!", 
+        multiplier: 3, 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "chipichipi.png", hp: 200, costCopes: 0, costXp: 0 }, // S'ha verificat "chipichipi.png" sense espais
+            { id: 1, name: "Mariachi", imgSrc: "chipimexico.png", hp: 350, costCopes: 6000, costXp: 1000 }, // S'ha verificat "chipimexico.png" sense espais
+            { id: 2, name: "Déu Suprem", imgSrc: "chipimexico.png", hp: 550, costCopes: 10000, costXp: 3000 }
+        ] 
+    },
+    24: { 
+        name: "Augusto", 
+        speed: 12, 
+        cost: 3200, 
+        desc: "El Déu que se diu augusto, multiplicador x3.2", 
+        multiplier: 3.2, 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "agusto.png", hp: 200, costCopes: 0, costXp: 0 }, // Verificat escrit "agusto"
+            { id: 1, name: "profesor", imgSrc: "agustoo.png", hp: 350, costCopes: 6000, costXp: 1000 } // Verificat escrit "agustoo"
+        ] 
+    },
+    25: { 
+        name: "Program", 
+        speed: 12, 
+        cost: 3400, 
+        desc: "El Déu que se diu program, multiplicador x3.4", 
+        multiplier: 3.4, 
+        skins: [
+            { id: 0, name: "Bàsic", imgSrc: "mpp.png", hp: 200, costCopes: 0, costXp: 0 }, // S'ha canviat a "mpp.png" segons la imatge
+            { id: 1, name: "Program pro", imgSrc: "mpp pro.png", hp: 350, costCopes: 6000, costXp: 1000 }, // Corregit a "mpp pro.png" segons la imatge
+            { id: 2, name: "Program pro", imgSrc: "mppp.png", hp: 600, costCopes: 9000, costXp: 1000 } // Corregit a "mppp.png"
+        ] 
+    },
+    26: { 
+        name: "Zynx", 
+        speed: 12, 
+        cost: 3600, 
+        desc: "El Déu que se diu Zynx, multiplicador x3.6", 
+        multiplier: 3.6, 
+        skins: [
+            { id: 0, name: "Zynx", imgSrc: "lynx.png", hp: 200, costCopes: 0, costXp: 0 }, // "lynx.png" (es veu clarament que no té la 'z')
+            { id: 1, name: "Payaso", imgSrc: "zynx2.png", hp: 450, costCopes: 6000, costXp: 1000 },
+            { id: 2, name: "Guitarrero", imgSrc: "zynx3.png", hp: 600, costCopes: 9000, costXp: 1000 }
+        ] 
+    },
+    27: { 
+        name: "Monty", 
+        speed: 12, 
+        cost: 3800, 
+        desc: "El cocodril guitarrista, multiplicador x3.8", 
+        multiplier: 3.8, 
+        skins: [
+            { id: 0, name: "Monty", imgSrc: "Monty.png", hp: 200, costCopes: 0, costXp: 0 }, // Coincideix amb "Monty.png" escrit en majúscula
+            { id: 1, name: "Montgomry", imgSrc: "monty 2.png", hp: 450, costCopes: 6000, costXp: 1000 }, // Amb espai, "monty 2.png" tal com indica la foto
+            { id: 2, name: "aligator", imgSrc: "monñi.png", hp: 600, costCopes: 9000, costXp: 1000 } // Corregit a "monñi.png" (amb 'ñ' tal com s'aprecia a la imatge)
+        ] 
+    },
+    28: { 
+        name: "Enzo", 
+        speed: 12, 
+        cost: 4000, 
+        desc: "el déu dels animals, multiplicador x4.0", 
+        multiplier: 4.0, 
+        skins: [
+            { id: 0, name: "Enzo", imgSrc: "ENZO.png", hp: 200, costCopes: 0, costXp: 0 }, // S'ha canviat a "ENZO.png" (tot majúscules segons es veu a la imatge)
+            { id: 1, name: "Enzito", imgSrc: "ENZITOOO.png", hp: 450, costCopes: 6000, costXp: 1000 }, // Ajustat a "ENZITOOO.png" escrit en majúscules i amb 3 os
+            { id: 2, name: "ENZOO", imgSrc: "ENZITOOOO.png", hp: 600, costCopes: 9000, costXp: 1000 } // Ajustat a "ENZITOOOO.png" escrit en majúscules i amb 4 os segons el fitxer de la imatge
+        ] 
+    },
+    29: { name: "Brawl Universe", speed: 12, cost: 4200, desc: "El personatge del joc, multiplicador x4.2", multiplier: 4.2, skins: [
+        { id: 0, name: "Brawl universe", imgSrc: "Brawl universe.png", hp: 200, costCopes: 0, costXp: 0 },
+      ]
+    },
+    30: { name: "Pumatronic", speed: 12, cost: 4400, desc: "El puma perillós i robotic, multiplicador x4.4", multiplier: 4.4, skins: [
+        { id: 0, name: "Pumatronic", imgSrc: "Pumatronic.png", hp: 200, costCopes: 0, costXp: 0 },
+        { id: 1, name: "Pumabeast", imgSrc: "Pumabeast.png", hp: 450, costCopes: 6000, costXp: 1000 }, 
+        { id: 2, name: "Pumatrun", imgSrc: "Pumatrun.png", hp: 600, costCopes: 9000, costXp: 1000 } 
+      ]
+    }
+  
 };
+
 
 const weapons = {
     0: { emoji: "🔫", dmg: 20, speed: 15, rate: 400, name: "Pistola", desc: "Arma bàsica inicial de foc ràpid." },
@@ -808,10 +1112,10 @@ for (let id in avatars) { avatars[id].skins.forEach(skin => { skin.imgObj = new 
 for (let boss of allBosses) { boss.imgObj = new Image(); boss.imgObj.src = boss.imgSrc; }
 
 const mapsData = {
-    1: { name: "Clàssic", bg: "bg1.png", bloc: "a.png", hacker: "b.png", aigua: "c.png", herba: "d.png", desc: "El mapa original verd on tot va començar." },
+    1: { name: "Bosc Clàssic", bg: "bg1.png", bloc: "a.png", hacker: "b.png", aigua: "c.png", herba: "d.png", desc: "El mapa original verd on tot va començar." },
     2: { name: "Infern de Lava", bg: "lava4.png", bloc: "lava2.png", hacker: "lava1.png", aigua: "lava3.png", herba: "lava5.png", desc: "La calor extrema, els castells i la lava." },
-    3: { name: "Infern del Gel", bg: "gel3.jpg", bloc: "gel2.png", hacker: "gel1.png", aigua: "gel4.jpg", herba: "gel5.png", desc: "La fred del gel, els castells i la neu." },
-    4: { name: "Bosc", bg: "bosc1.jpg", bloc: "bosc3.png", hacker: "bosc2.png", aigua: "bosc5.png", herba: "bosc4.png", desc: "La frescor del bosc, els arbres maleits." }
+    3: { name: "Glaciar Mortal", bg: "gel3.jpg", bloc: "gel2.png", hacker: "gel1.png", aigua: "gel4.jpg", herba: "gel5.png", desc: "La fred del gel, els castells i la neu." },
+    4: { name: "Bosc Maleït", bg: "bosc1.jpg", bloc: "bosc3.png", hacker: "bosc2.png", aigua: "bosc5.png", herba: "bosc4.png", desc: "La frescor del bosc, els arbres maleits." }
 };
 const bgImage = new Image();
 const mapImages = { 'bloc': new Image(), 'hacker': new Image(), 'aigua': new Image(), 'herba': new Image() };
@@ -1346,7 +1650,6 @@ function updateAndDrawSpecials(now) {
                 if(ent.vy > 0) { for(let mapO of mapObjects) { if(mapO.type === 'herba' && ent.x > mapO.x && ent.x < mapO.x + mapO.w && ent.y > mapO.y && ent.y < mapO.y + mapO.h) { mapO.bloodDrops.push({x: ent.x, y: ent.y}); remove = true; break; } } }
                 if(now - ent.creationTime > (ent.life||1000) || ent.y > canvas.height) remove = true; break;
             case 'spark':
-                // Les espurnes es processen abaix directament en draw, això assegura que s'esborrin correctament.
                 break;
         }
         ctx.restore();
@@ -1435,10 +1738,45 @@ function buySkin(brawlerId, skinId, costCopes, costXp) {
 }
 
 function spinRoulette() {
-    let random = allBosses[Math.floor(Math.random() * allBosses.length)]; selectedBoss = random;
-    document.getElementById('roulette-display').innerText = random.projectile; document.getElementById('boss-random-name').innerText = random.name;
-    document.getElementById('spin-btn').disabled = true;
-    setTimeout(() => { document.getElementById('spin-btn').disabled = false; startGame(); }, 1500); 
+    let btn = document.getElementById('spin-btn');
+    btn.disabled = true;
+
+    // Afegeix la classe per aplicar l'animació a les ruletes
+    let bossDisplay = document.getElementById('roulette-display-boss');
+    let mapDisplay = document.getElementById('roulette-display-map');
+    
+    bossDisplay.classList.add('roulette-spinning');
+    mapDisplay.classList.add('roulette-spinning');
+
+    // Escullim aleatòriament Boss i Mapa després d'un timeout de suspens
+    setTimeout(() => {
+        // Aturem animació
+        bossDisplay.classList.remove('roulette-spinning');
+        mapDisplay.classList.remove('roulette-spinning');
+
+        // Seleccionar Boss
+        let randomBoss = allBosses[Math.floor(Math.random() * allBosses.length)]; 
+        selectedBoss = randomBoss;
+        bossDisplay.innerText = randomBoss.projectile; 
+        document.getElementById('boss-random-name').innerText = randomBoss.name;
+
+        // Seleccionar Mapa
+        let mapKeys = Object.keys(mapsData);
+        let randomMapId = mapKeys[Math.floor(Math.random() * mapKeys.length)];
+        selectedMap = parseInt(randomMapId);
+        let mapObj = mapsData[selectedMap];
+        
+        let mapEmoji = selectedMap === 1 ? "🌳" : selectedMap === 2 ? "🌋" : selectedMap === 3 ? "❄️" : "🌲";
+        mapDisplay.innerText = mapEmoji; 
+        document.getElementById('map-random-name').innerText = mapObj.name;
+        
+        // Guardem les dades i carreguem fons del mapa assignat
+        localStorage.setItem('selectedMap', selectedMap);
+        loadMapImages();
+
+        // Començar la partida després d'1 segon de veure els resultats
+        setTimeout(() => { btn.disabled = false; startGame(); }, 1500);
+    }, 1500); 
 }
 
 function redeemCode() {
@@ -1480,12 +1818,19 @@ function goHome() {
     document.getElementById('menu-world').style.display = 'flex'; document.getElementById('global-back-btn').style.display = 'none';
     document.getElementById('top-nav-right').style.display = 'flex'; document.getElementById('profile-btn').style.display = 'block'; document.getElementById('centes-display').style.display = 'block';
     updateUI(); canviarAMusicaMenu();
+    
+    // Resetear ruletes visualment al tornar a l'inici
+    document.getElementById('roulette-display-boss').innerText = "❓";
+    document.getElementById('boss-random-name').innerText = "???";
+    document.getElementById('roulette-display-map').innerText = "🌍";
+    document.getElementById('map-random-name').innerText = "???";
 }
+
 function skipAnimation() { document.getElementById('endgame-animation').style.display = 'none'; goHome(); }
 
 /**
  * ==========================================================================
- * MÓDULO 12: SISTEMAS DE MENÚS FALTANTES (PERFIL, MAPAS, MISIONES Y CÓDIGOS)
+ * MÓDULO 12: SISTEMAS DE MENÚS FALTANTES (PERFIL, MISIONES Y CÓDIGOS)
  * ==========================================================================
  */
 function openCodes() { openMenu('page-codes'); }
@@ -1507,38 +1852,7 @@ function saveName() {
     }
 }
 
-function openMaps() {
-    openMenu('page-maps');
-    const grid = document.getElementById('maps-grid');
-    grid.innerHTML = "";
-    for(let id in mapsData) {
-        let m = mapsData[id];
-        let isSelected = selectedMap == id;
-        let card = document.createElement('div');
-        card.style.background = isSelected ? "rgba(50,255,50,0.2)" : "rgba(0,0,0,0.6)";
-        card.style.border = isSelected ? "4px solid #32ff32" : "4px solid #555";
-        card.style.borderRadius = "20px";
-        card.style.padding = "20px";
-        card.style.width = "250px";
-        card.style.textAlign = "center";
-        card.style.cursor = "pointer";
-        card.style.transition = "0.3s";
-        card.innerHTML = `
-            <h3 style="color: ${isSelected ? '#32ff32' : 'white'}; margin-top:0;">${m.name}</h3>
-            <p style="color: #aaa; font-size:14px; height: 40px;">${m.desc}</p>
-            <button style="background: ${isSelected ? '#32ff32' : '#fff'}; color: black; border: none; padding: 10px 20px; font-weight: bold; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%;">
-                ${isSelected ? 'SELECCIONAT' : 'ELEGIR MAPA'}
-            </button>
-        `;
-        card.onclick = () => {
-            selectedMap = parseInt(id);
-            localStorage.setItem('selectedMap', selectedMap);
-            loadMapImages();
-            openMaps();
-        };
-        grid.appendChild(card);
-    }
-}
+// ELIMINADA LA FUNCIÓ openMaps() COM ES VA DEMANAR.
 
 function openRewards() { openMenu('page-rewards'); }
 
