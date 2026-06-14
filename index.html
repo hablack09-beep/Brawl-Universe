@@ -697,8 +697,53 @@ const AchievementsData = [
     { id: 2, name: "Acaparador d'Energia", desc: "Acumula històricament un total de 5.000 XP a la teva compta.", icon: "logro2.png", checkComplete: () => userStats.xpEarnedTotal >= 5000, rewardType: "lucky", rewardValue: "magic", rewardText: "Magic Block" },
     { id: 3, name: "Col·leccionista Bèl·lic", desc: "Adquireix al menys 5 armes diferents a la botiga.", icon: "logro3.png", checkComplete: () => userStats.weaponsBought >= 5, rewardType: "xp", rewardValue: 200, rewardText: "+1000 XP" },
     { id: 4, name: "Viatger Dimensional", desc: "Juga partides a 3 mapes de jugabilitat diferents.", icon: "logro4.png", checkComplete: () => userStats.mapsPlayed.length >= 3, rewardType: "lucky", rewardValue: "rainbow", rewardText: "Rainbow Block" },
-    { id: 5, name: "Addicte a l'Atzar", desc: "Obre 5 caixes de Lucky Blocks durant toda la teva trajectòria.", icon: "logro5.png", checkComplete: () => userStats.luckyBlocksOpened >= 5, rewardType: "xp", rewardValue: 2000, rewardText: "+2000 XP" },
-    { id: 6, name: "El Duo Dinàmic", desc: "Desbloqueja a Huguito i a Tete11 a la teva col·lecció de Brawlers.", icon: "hugojose.png",checkComplete: () => unlockedChars.includes(18) && unlockedChars.includes(19), rewardType: "lucky", rewardValue: "admin", rewardText: "Admin Block" }
+    { id: 5, name: "Addicte a l'Atzar", desc: "Obre 5 caixes de Lucky Blocks durant tota la teva trajectòria.", icon: "logro5.png", checkComplete: () => userStats.luckyBlocksOpened >= 5, rewardType: "xp", rewardValue: 2000, rewardText: "+2000 XP" },
+    { id: 6, name: "El Duo Dinàmic", desc: "Desbloqueja a Huguito i a Tete11 a la teva col·lecció de Brawlers.", icon: "hugojose.png",checkComplete: () => unlockedChars.includes(18) && unlockedChars.includes(19), rewardType: "lucky", rewardValue: "admin", rewardText: "Admin Block" },
+    { id: 7, name: "Aprenent de Caçador", desc: "Derrota 5 Bossos.", icon: "logro7.png", checkComplete: () => userStats.bossesDefeated >= 5, rewardType: "xp", rewardValue: 500, rewardText: "+500 XP" },
+    { id: 8, name: "Expert del Repte", desc: "Derrota 10 Bossos.", icon: "logro8.png", checkComplete: () => userStats.bossesDefeated >= 10, rewardType: "xp", rewardValue: 1000, rewardText: "+1000 XP" },
+    { id: 9, name: "Mestre del Combat", desc: "Derrota 25 Bossos.", icon: "logro9.png", checkComplete: () => userStats.bossesDefeated >= 25, rewardType: "lucky", rewardValue: "rainbow", rewardText: "Rainbow Block" },
+    { id: 10, name: "Campió Imperible", desc: "Derrota 50 Bossos.", icon: "logro10.png", checkComplete: () => userStats.bossesDefeated >= 50, rewardType: "lucky", rewardValue: "magic", rewardText: "Magic Block" },
+    { id: 11, name: "Defensor de l'Univers", desc: "Derrota 100 Bossos.", icon: "logro11.png", checkComplete: () => userStats.bossesDefeated >= 100, rewardType: "xp", rewardValue: 10000, rewardText: "+10.000 XP" },
+    { id: 12, name: "Mite Vivent", desc: "Derrota 500 Bossos.", icon: "logro12.png", checkComplete: () => userStats.bossesDefeated >= 500, rewardType: "lucky", rewardValue: "admin", rewardText: "Admin Block" },
+    { id: 13, name: "Aspirant a Ric", desc: "Acumula històricament 10.000 XP.", icon: "logro13.png", checkComplete: () => userStats.xpEarnedTotal >= 10000, rewardType: "xp", rewardValue: 1000, rewardText: "+1000 XP" },
+    { id: 14, name: "Riquesa Moderada", desc: "Acumula històricament 25.000 XP.", icon: "logro14.png", checkComplete: () => userStats.xpEarnedTotal >= 25000, rewardType: "lucky", rewardValue: "rainbow", rewardText: "Rainbow Block" },
+    { id: 15, name: "Fortuna Bèstia", desc: "Acumula històricament 50.000 XP.", icon: "logro15.png", checkComplete: () => userStats.xpEarnedTotal >= 50000, rewardType: "xp", rewardValue: 5000, rewardText: "+5000 XP" },
+    { id: 16, name: "Milionari d'Energia", desc: "Acumula històricament 100.000 XP.", icon: "logro16.png", checkComplete: () => userStats.xpEarnedTotal >= 100000, rewardType: "lucky", rewardValue: "magic", rewardText: "Magic Block" },
+    { id: 17, name: "Magnat", desc: "Acumula històricament 500.000 XP.", icon: "logro17.png", checkComplete: () => userStats.xpEarnedTotal >= 500000, rewardType: "xp", rewardValue: 50000, rewardText: "+50.000 XP" },
+    { id: 18, name: "Déu de l'Energia", desc: "Acumula històricament 1.000.000 XP.", icon: "logro18.png", checkComplete: () => userStats.xpEarnedTotal >= 1000000, rewardType: "lucky", rewardValue: "admin", rewardText: "Admin Block" },
+    { id: 19, name: "Inabastable", desc: "Acumula històricament 5.000.000 XP.", icon: "logro19.png", checkComplete: () => userStats.xpEarnedTotal >= 5000000, rewardType: "lucky", rewardValue: "admin", rewardText: "Admin Block" },
+    { id: 20, name: "Cercador de Sort", desc: "Obre 10 Lucky Blocks.", icon: "logro20.png", checkComplete: () => userStats.luckyBlocksOpened >= 10, rewardType: "xp", rewardValue: 2000, rewardText: "+2000 XP" },
+    { id: 21, name: "Explorador del Destí", desc: "Obre 25 Lucky Blocks.", icon: "logro21.png", checkComplete: () => userStats.luckyBlocksOpened >= 25, rewardType: "lucky", rewardValue: "magic", rewardText: "Magic Block" },
+    { id: 22, name: "Màgic de les Caixes", desc: "Obre 50 Lucky Blocks.", icon: "logro22.png", checkComplete: () => userStats.luckyBlocksOpened >= 50, rewardType: "xp", rewardValue: 10000, rewardText: "+10.000 XP" },
+    { id: 23, name: "Mestre de la Sort", desc: "Obre 100 Lucky Blocks.", icon: "logro23.png", checkComplete: () => userStats.luckyBlocksOpened >= 100, rewardType: "lucky", rewardValue: "admin", rewardText: "Admin Block" },
+    { id: 24, name: "Arsenal Bàsic", desc: "Compra 10 armes diferents a la botiga.", icon: "logro24.png", checkComplete: () => userStats.weaponsBought >= 10, rewardType: "xp", rewardValue: 2500, rewardText: "+2500 XP" },
+    { id: 25, name: "Col·leccionista d'Armes", desc: "Compra 15 armes diferents a la botiga.", icon: "logro25.png", checkComplete: () => userStats.weaponsBought >= 15, rewardType: "lucky", rewardValue: "magic", rewardText: "Magic Block" },
+    { id: 26, name: "Mestre Armer", desc: "Compra 20 armes diferents a la botiga.", icon: "logro26.png", checkComplete: () => userStats.weaponsBought >= 20, rewardType: "lucky", rewardValue: "admin", rewardText: "Admin Block" },
+    { id: 27, name: "Cartera Plena", desc: "Aconsegueix tenir 500 Copes a la vegada.", icon: "logro27.png", checkComplete: () => copes >= 500, rewardType: "xp", rewardValue: 500, rewardText: "+500 XP" },
+    { id: 28, name: "Competidor Nat", desc: "Aconsegueix tenir 1.000 Copes a la vegada.", icon: "logro28.png", checkComplete: () => copes >= 1000, rewardType: "lucky", rewardValue: "rainbow", rewardText: "Rainbow Block" },
+    { id: 29, name: "Gladiador d'Elit", desc: "Aconsegueix tenir 5.000 Copes a la vegada.", icon: "logro29.png", checkComplete: () => copes >= 5000, rewardType: "lucky", rewardValue: "magic", rewardText: "Magic Block" },
+    { id: 30, name: "Líder Mundial", desc: "Aconsegueix tenir 10.000 Copes a la vegada.", icon: "logro30.png", checkComplete: () => copes >= 10000, rewardType: "xp", rewardValue: 25000, rewardText: "+25.000 XP" },
+    { id: 31, name: "Copes infinites", desc: "Aconsegueix tenir 50.000 Copes a la vegada.", icon: "logro31.png", checkComplete: () => copes >= 50000, rewardType: "lucky", rewardValue: "admin", rewardText: "Admin Block" },
+    { id: 32, name: "Butxaca Màgica", desc: "Aconsegueix tenir 5.000 XP actuals.", icon: "logro32.png", checkComplete: () => xp >= 5000, rewardType: "lucky", rewardValue: "rainbow", rewardText: "Rainbow Block" },
+    { id: 33, name: "Inversor d'XP", desc: "Aconsegueix tenir 20.000 XP actuals.", icon: "logro33.png", checkComplete: () => xp >= 20000, rewardType: "lucky", rewardValue: "magic", rewardText: "Magic Block" },
+    { id: 34, name: "Tresoreria d'Estrelles", desc: "Aconsegueix tenir 50.000 XP actuals.", icon: "logro34.png", checkComplete: () => xp >= 50000, rewardType: "xp", rewardValue: 10000, rewardText: "+10.000 XP" },
+    { id: 35, name: "Banc Central d'XP", desc: "Aconsegueix tenir 100.000 XP actuals.", icon: "logro35.png", checkComplete: () => xp >= 100000, rewardType: "lucky", rewardValue: "admin", rewardText: "Admin Block" },
+    { id: 36, name: "Equip Petit", desc: "Desbloqueja 5 Brawlers diferents.", icon: "logro36.png", checkComplete: () => unlockedChars.length >= 5, rewardType: "xp", rewardValue: 1500, rewardText: "+1500 XP" },
+    { id: 37, name: "Gran Família", desc: "Desbloqueja 10 Brawlers diferents.", icon: "logro37.png", checkComplete: () => unlockedChars.length >= 10, rewardType: "lucky", rewardValue: "magic", rewardText: "Magic Block" },
+    { id: 38, name: "Exèrcit Propi", desc: "Desbloqueja 15 Brawlers diferents.", icon: "logro38.png", checkComplete: () => unlockedChars.length >= 15, rewardType: "xp", rewardValue: 5000, rewardText: "+5000 XP" },
+    { id: 39, name: "Lliga dels Herois", desc: "Desbloqueja 20 Brawlers diferents.", icon: "logro39.png", checkComplete: () => unlockedChars.length >= 20, rewardType: "lucky", rewardValue: "admin", rewardText: "Admin Block" },
+    { id: 40, name: "Tots a bord!", desc: "Desbloqueja 25 Brawlers diferents.", icon: "logro40.png", checkComplete: () => unlockedChars.length >= 25, rewardType: "lucky", rewardValue: "admin", rewardText: "Admin Block" },
+    { id: 41, name: "Camí Iniciat", desc: "Reclama 5 nivells del Camí de Recompenses.", icon: "logro41.png", checkComplete: () => claimedLevels.length >= 5, rewardType: "xp", rewardValue: 1000, rewardText: "+1000 XP" },
+    { id: 42, name: "Viatger del Camí", desc: "Reclama 10 nivells del Camí de Recompenses.", icon: "logro42.png", checkComplete: () => claimedLevels.length >= 10, rewardType: "lucky", rewardValue: "rainbow", rewardText: "Rainbow Block" },
+    { id: 43, name: "Explorador de Recompenses", desc: "Reclama 25 nivells del Camí de Recompenses.", icon: "logro43.png", checkComplete: () => claimedLevels.length >= 25, rewardType: "lucky", rewardValue: "magic", rewardText: "Magic Block" },
+    { id: 44, name: "Expert Reclamador", desc: "Reclama 50 nivells del Camí de Recompenses.", icon: "logro44.png", checkComplete: () => claimedLevels.length >= 50, rewardType: "xp", rewardValue: 15000, rewardText: "+15.000 XP" },
+    { id: 45, name: "Déu del Camí", desc: "Reclama 100 nivells del Camí de Recompenses.", icon: "logro45.png", checkComplete: () => claimedLevels.length >= 100, rewardType: "lucky", rewardValue: "admin", rewardText: "Admin Block" },
+    { id: 46, name: "El Teu Primer Secret", desc: "Canvia el teu primer codi secret amb èxit.", icon: "logro46.png", checkComplete: () => usedCodes.length >= 1, rewardType: "xp", rewardValue: 1000, rewardText: "+1000 XP" },
+    { id: 47, name: "Furoner de Codis", desc: "Canvia 5 codis secrets amb èxit.", icon: "logro47.png", checkComplete: () => usedCodes.length >= 5, rewardType: "lucky", rewardValue: "magic", rewardText: "Magic Block" },
+    { id: 48, name: "Mestre de la Matrix", desc: "Canvia 10 codis secrets amb èxit.", icon: "logro48.png", checkComplete: () => usedCodes.length >= 10, rewardType: "lucky", rewardValue: "admin", rewardText: "Admin Block" },
+    { id: 49, name: "El Rei dels Pirates", desc: "Aconsegueix i desbloqueja en Luffy.", icon: "luffy.webp", checkComplete: () => unlockedChars.includes(17), rewardType: "xp", rewardValue: 5000, rewardText: "+5000 XP" },
+    { id: 50, name: "Poder Fosc", desc: "Aconsegueix i desbloqueja en BlackGoku.", icon: "blackgoku.png", checkComplete: () => unlockedChars.includes(11), rewardType: "lucky", rewardValue: "magic", rewardText: "Magic Block" },
+    { id: 51, name: "Animatrònic Feliç", desc: "Aconsegueix i desbloqueja en Zynx.", icon: "lynx.png", checkComplete: () => unlockedChars.includes(26), rewardType: "lucky", rewardValue: "admin", rewardText: "Admin Block" }
 ];
 
 function checkAchievementsBackground() {
@@ -902,7 +947,7 @@ const avatars = {
     20: { name: "Noah", speed: 12, cost: 2400, desc: "Esa sarten me pego la cabeza. Multiplicador elèctric x2.4", multiplier: 2.4, skins: [ 
         { id: 0, name: "Bàsic", imgSrc: "noah.png", hp: 400, costCopes: 0, costXp: 0 }, 
         { id: 1, name: "Noah pixel", imgSrc: "noah1.png", hp: 350, costCopes: 6000, costXp: 1000 }, 
-        { id: 2, name: "Noah croco", imgSrc: "noah2.png", hp: 550, cost00: 10000, costXp: 3000 } ] },
+        { id: 2, name: "Noah croco", imgSrc: "noah2.png", hp: 550, costCopes: 10000, costXp: 3000 } ] },
     21: { name: "Adriluski999", speed: 12, cost: 2600, desc: "Antes estava calvo de hacer tantas partidas. Multiplicador elèctric x2.6", multiplier: 2.6, skins: [ 
         { id: 0, name: "Bàsic", imgSrc: "adriluski.png", hp: 400, costCopes: 0, costXp: 0 }, 
         { id: 1, name: "Antibales", imgSrc: "adri2.png", hp: 450, costCopes: 6000, costXp: 1000 }, 
@@ -943,7 +988,7 @@ const weapons = {
     11: { emoji: "🦧", dmg: 100, speed: 0, rate: 8000, name: "Gorilla", type: 'special_gorilla_summon', desc: "Planta un arbre de la vida del qual surten goril·les rastrejadors defensors." },
     12: { emoji: "👣", dmg: 25, speed: 0, rate: 15000, name: "Pies tòxics", type: 'special_pies_buff', desc: "Buf actiu: Deixes empremtes verinoses per on camines." },
     13: { emoji: "🪦", dmg: 100, speed: 0, rate: 10000, name: "Muertos", type: 'special_tumbas', desc: "Invocació nigromàntica: 3 tombes espawnegen zombies lents però imparables." },
-    14: { emoji: "🥾", dmg: 300, speed: 0, rate: 6000, name: "Te piso", type: 'special_zapato', desc: "Caiguda des del cel massiva i demolidora. Un tret directe molt fort." },
+    14: { emoji: "🥾", dmg: 300, speed: 0, rate: 6000, name: "Te piso", type: 'special_zapato', desc: "Caiguda des del cel massiva i demolidora. Un tret directo molt fort." },
     15: { emoji: "🕹️", dmg: 350, speed: 0, rate: 7000, name: "Maquina de ganxo", type: 'special_gancho', desc: "Baixa des del cel, agafa el boss, l'estordeix i el danya." },
     16: { emoji: "🎶", dmg: 50, speed: 0, rate: 5000, name: "Notas", type: 'special_notas', desc: "Tret triple en espassa per netejar la zona d'enemics." },
     17: { emoji: "🧲", dmg: 0, speed: 0, rate: 20000, name: "Iman", type: 'special_iman', desc: "Atrapa el Boss i el deixa enganxat al terra immòbil per atacar-lo fàcil." },
@@ -1465,9 +1510,9 @@ function spawnInitialNumbers() {
             num: i,
             x: Math.random() * (canvas.width - 150) + 75,
             y: Math.random() * (canvas.height - 150) + 75,
-            vx: (Math.random() - 0.5) * 3, // Reduïda l'aleatorietat de velocitat inicial
-            vy: (Math.random() - 0.5) * 3, // Reduïda l'aleatorietat de velocitat inicial
-            baseSpeed: 3,                  // Velocitat base modificada a 3
+            vx: (Math.random() - 0.5) * 3, 
+            vy: (Math.random() - 0.5) * 3, 
+            baseSpeed: 3,                  
             size: 40
         });
     }
@@ -1480,7 +1525,7 @@ function updateAndDrawNumbers() {
     for (let i = numbersList.length - 1; i >= 0; i--) {
         let n = numbersList[i];
         
-        // Intel·ligència Artificial d'Evasió (Es mou de manera oposada al jugador si s'acosta)
+        // Intel·ligència IA d'Evasió
         let distToPlayer = Math.hypot(player.x - n.x, player.y - n.y);
         if (distToPlayer < 250) {
             let angle = Math.atan2(n.y - player.y, n.x - player.x);
@@ -1499,25 +1544,25 @@ function updateAndDrawNumbers() {
         n.x += n.vx;
         n.y += n.vy;
         
-        // Definició de marge de seguretat segons la mida del cercle del número (mida = 40, radi = 20)
-        const margin = (n.size / 2) + 15; // Un marge de 35 píxels des de la vora del Canvas
+        // Marge de seguretat segons la mida del cercle del número (mida = 40, radi = 20)
+        const margin = (n.size / 2) + 15; 
         
         // Control estricte horitzontal per evitar que surtin del Canvas
         if (n.x < margin) {
             n.x = margin;
-            n.vx = Math.abs(n.vx); // Força a anar cap a la dreta
+            n.vx = Math.abs(n.vx); 
         } else if (n.x > canvas.width - margin) {
             n.x = canvas.width - margin;
-            n.vx = -Math.abs(n.vx); // Força a anar cap a l'esquerra
+            n.vx = -Math.abs(n.vx); 
         }
         
         // Control estricte vertical per evitar que surtin del Canvas
         if (n.y < margin) {
             n.y = margin;
-            n.vy = Math.abs(n.vy); // Força a anar cap avall
+            n.vy = Math.abs(n.vy); 
         } else if (n.y > canvas.height - margin) {
             n.y = canvas.height - margin;
-            n.vy = -Math.abs(n.vy); // Força a anar cap amunt
+            n.vy = -Math.abs(n.vy); 
         }
         
         // Dibuixar el número envoltador amb brillantor ciberpunk
@@ -1559,9 +1604,6 @@ function initPlatformsRound() {
     platformPhase = 'prepare';
     roundEndTime = Date.now() + 8000; // 5s preparació + 3s perill = 8s total
     
-    // El número de plataformes vermelles varia segons la ronda
-    let activePlatforms = [];
-    
     if (survivalRound === 1) {
         // Ronda 1: Generar les 24 plataformes inicials distribuïdes uniformement
         gridPlatforms = [];
@@ -1580,7 +1622,7 @@ function initPlatformsRound() {
                     y: gapY + r * (pHeight + gapY),
                     w: pWidth,
                     h: pHeight,
-                    color: 'black', // Inici black
+                    color: 'black', 
                     active: true
                 });
             }
@@ -1620,7 +1662,6 @@ function updateAndDrawPlatforms() {
         ctx.shadowBlur = p.color === 'red' ? 20 : 8;
         ctx.shadowColor = p.color === 'red' ? 'red' : 'rgba(0,188,255,0.5)';
         
-        // Dibuixar rectangle arrodonit
         ctx.beginPath();
         ctx.roundRect(p.x, p.y, p.w, p.h, 15);
         ctx.fill();
@@ -1665,7 +1706,6 @@ function checkPlatformsRoundEnd() {
     let currentPlatform = null;
     gridPlatforms.forEach(p => {
         if (!p.active) return;
-        // Comprovar si el centre del personatge està dins els límits
         if (player.x >= p.x && player.x <= p.x + p.w && player.y >= p.y && player.y <= p.y + p.h) {
             currentPlatform = p;
         }
@@ -1695,6 +1735,7 @@ function checkPlatformsRoundEnd() {
     }
 }
 
+// Control d'acabament de partides per a modes alternatius
 // Control d'acabament de partides per a modes alternatius
 function endGameMultiMode(victory) {
     gameRunning = false;
@@ -1752,13 +1793,9 @@ function endGameMultiMode(victory) {
         }
     }
     
-    // Canviar la font del GIF segons victòria o derrota (amb contingut segur i net)
+    // MODIFICACIÓ: Assignar sempre el fitxer "animation.gif" per a totes les partides quan s'acaben
     const gifElement = document.getElementById('endgame-gif');
-    if (victory || curMode === 'gems') {
-        gifElement.src = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3N2MDc0cHdweHF0N3h4MTdzdmZ6NThidnduam9nZDNudGFtYnJ5eiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/t3s3XfJuEXu0A0HGoY/giphy.gif"; // Ball de victòria divertit de dibuixos
-    } else {
-        gifElement.src = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMDRoOTBhOGgxaGV0MHZtdDR4NGRkZTBiaTB4ejdndjhhczYxajVpaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/9Y5BbDSkSTiY8/giphy.gif"; // Reacció d'esforçar-se o "Game Over" d'estil retro divertit
-    }
+    gifElement.src = "animation.gif"; 
     
     updateUI();
     document.getElementById('endgame-animation').style.display = 'flex';
@@ -1960,7 +1997,7 @@ function draw() {
             if (equippedWeapons.includes(parseInt(curWeapon)) && now - lastF > w.rate) {
                 let angle = Math.atan2(mouseY-player.y, mouseX-player.x);
                 if(w.type && w.type.startsWith('special_')) { spawnSpecialWeapon(w.type, w, angle, now); } 
-                else { bullets.push({ x: player.x, y: player.y, vx: w.speed===0 ? 0 : Math.cos(angle)*w.speed, vy: w.speed===0 ? 0 : Math.sin(angle)*w.speed, emoji: w.emoji, dmg: w.dmg, weaponId: curWeapon, creationTime: now, rebounces: 0 }); }
+                else { bullets.push({ x: player.x, y: player.y, vx: w.speed===0 ? 0 : Math.cos(angle)*w.speed, vy: Math.sin(angle)*w.speed, emoji: w.emoji, dmg: w.dmg, weaponId: curWeapon, creationTime: now, rebounces: 0 }); }
                 weapons.lastFired[curWeapon] = now;
             }
         }
@@ -2251,7 +2288,7 @@ function updateAvatarPreview() {
         btnAction.innerText = "DESPLEGAR BRAWLER"; btnAction.style.background = "#00bcff";
         btnAction.onclick = () => { 
             curForm = tempSelected; 
-            openGameModesWheel(); // Obre la ruleta de modes de joc
+            openGameModesWheel(); 
         };
     } else {
         btnAction.innerText = "CONTRACTAR (" + av.cost + " 🏆)"; btnAction.style.background = "#ffcc00";
@@ -2299,21 +2336,12 @@ function spinGameModeWheel() {
     const btn = document.getElementById('spin-mode-btn');
     btn.disabled = true;
     
-    // Decidir aleatòriament el mode de joc:
-    // 0: Gems, 1: Numbers, 2: Platforms, 3: Boss
     const modes = ['gems', 'numbers', 'platforms', 'boss'];
     const chosenIdx = Math.floor(Math.random() * modes.length);
     const chosenMode = modes[chosenIdx];
     
-    // Àngels de gir (Cada llesca és de 90 graus)
-    // Gems: [0 - 90] -> 45 graus central
-    // Numbers: [90 - 180] -> 135 graus central
-    // Platforms: [180 - 270] -> 225 graus central
-    // Boss: [270 - 360] -> 315 graus central
     const baseDegrees = [45, 135, 225, 315];
     const targetDegree = baseDegrees[chosenIdx];
-    
-    // Li sumem 5 voltes completes perquè l'animació sigui potent (1800 graus)
     const finalDegree = 1800 + (360 - targetDegree); 
     
     const wheel = document.getElementById('roulette-wheel');
@@ -2334,11 +2362,9 @@ function spinGameModeWheel() {
         curMode = chosenMode;
         
         if (curMode === 'boss') {
-            // Passem a la ruleta dels bosses clàssica per finalitzar la configuració
             openMenu('menu-boss');
             document.getElementById('global-back-btn').style.display = 'none';
         } else {
-            // Inici directe del joc per a la resta de modalitats
             startGame();
         }
     }, 4500);
@@ -2358,7 +2384,7 @@ function redeemCode() {
     let success = false; let message = "";
     if (codeInput === "starter") { copes += 100; grantXP(300, true); message = "Paquet d'inversió obtingut!"; success = true; } 
     else if (codeInput === "oiia") { buyWeapon(7, 0); message = "Hackeig visual complert."; success = true; } 
-    else if (codeInput === "gototheredline") { unlockBrawlerAndSkin(17, 2); message = "Has penetrat les dades amb èxit! Desbloquejat: LUFFY OFICIALi la seva segona skin!"; success = true; } 
+    else if (codeInput === "gototheredline") { unlockBrawlerAndSkin(17, 2); message = "Has penetrat les dades amb èxit! Desbloquejat: LUFFY OFICIAL i la seva segona skin!"; success = true; } 
     else if (codeInput === "nooakiratoriyamarip") { unlockBrawlerAndSkin(11, 2); message = "Llegat obtingut. Has desbloquejat de memòria permanent: BLACK GOKU amb Skin Goku4"; success = true; } 
     else if (codeInput === "subahablack09") { unlockBrawlerAndSkin(7, 2); message = "Donació completada! Has desbloquejat: HABLACK09 (Omega variant)!"; success = true; }
     else if (codeInput === "sersquierrefreepaleta") { unlockBrawlerAndSkin(9, 2); message = "Donació completada! Has desbloquejat: sers déu!"; success = true; } 
@@ -2391,6 +2417,7 @@ function goHome() {
     document.getElementById('top-nav-right').style.display = 'flex'; document.getElementById('profile-btn').style.display = 'block'; document.getElementById('centes-display').style.display = 'block';
     updateUI(); canviarAMusicaMenu();
 }
+
 function skipAnimation() { document.getElementById('endgame-animation').style.display = 'none'; goHome(); }
 
 /**
@@ -2450,7 +2477,6 @@ function openMaps() {
     }
 }
 
-// Ocultar o mostrar els continguts dels esdeveniments actius
 function openRewards() { openMenu('page-rewards'); }
 
 function startMission(timeMins, requiredCopes, xpReward) {
@@ -2492,12 +2518,11 @@ function updateMissionUI() {
     }
 }
 
-// Inicialització de Teclat i Mouse (S'ha millorat l'enregistrament perquè funcioni correctament)
+// Inicialització de Teclat i Mouse
 window.addEventListener('keydown', e => { 
     lastActionTime = Date.now(); 
     let k = e.key.toLowerCase();
     
-    // Desa l'estat de les tecles de moviment de forma immediata i minúscula
     if (['w', 'a', 's', 'd'].includes(k)) {
         keys[k] = true;
     }
